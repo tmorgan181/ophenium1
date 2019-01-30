@@ -24,9 +24,6 @@ client.on('ready', () => {
   testChannel.send("Connected...");
 });
 
-client.login();
-
-/*
 client.on('message', (receivedMessage) => {
   //Prevent bot from responding to itself
   if (receivedMessage.author == client.user) {
@@ -39,22 +36,26 @@ client.on('message', (receivedMessage) => {
 })
 
 function processCommand(receivedMessage) {
-  let fullCommand = receivedMessage.content.substr(1); //remove the !
+
+  let userLength = client.user.toString().length + 1; //get mention link
+  let fullCommand = receivedMessage.content.slice(userLength);
   let splitCommand = fullCommand.split(" "); //split message at spaces
-  let primaryCommand = splitCommand[0]; //first word after ! is command
-  let arguments = splitCommand.slice(1); //all other words are args/parameters
+  let primaryCommand = splitCommand[0]; //first word is primary command
+  let arguments = splitCommand.slice(1); //rest of words are arguments
 
   if (primaryCommand == "help") {
-    helpCommand(arguments, receivedMessage);
+    receivedMessage.channel.send("You said help");
+    //helpCommand(arguments, receivedMessage);
   } else if (primaryCommand == "shout") {
-    shoutCommand(arguments, receivedMessage);
+    receivedMessage.channel.send("You said shout");
+    //shoutCommand(arguments, receivedMessage);
   } else {
     receivedMessage.channel.send("Sorry, I don't understand your command. " +
     "It's likely due to the fact that I'm a stupid robot, " +
     "but maybe you're the stupid one?");
   }
 }
-
+/*
 function helpCommand(arguments, receivedMessage) {
   if (arguments.length > 0) {
     switch (arguments.content.toString()) { //THIS DOESN'T WORK (i think), FIX
@@ -84,3 +85,4 @@ function shoutCommand(arguments, receivedMessage) {
   }
 }
 */
+client.login();
