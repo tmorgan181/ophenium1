@@ -81,4 +81,4 @@ function shoutCommand(arguments, receivedMessage) {
   }
 }
 
-client.login("NTM5NTk4NjI1MDI2ODY3MjQ5.DzFFYQ.IhFU6sLaAoeeYm6KQs8YSEoGfZU");
+client.login("");
