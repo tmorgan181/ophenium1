@@ -1,26 +1,10 @@
+require('dotenv').config;
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
 client.on('ready', () => {
-  console.log("Connected as " + client.user.tag);
-
-  //Set activity
-  client.user.setActivity("you", {type: "loving"});
-
-  //Send message to designated channel
-  var botChannel = client.channels.get("539642539662245888");
-  botChannel.send("Ophenium I connected...");
-
-  //List all servers bot is connected to
-  console.log("Servers:");
-  client.guilds.forEach((guild) => {
-    console.log(" - " + guild.name);
-
-    //List all channels in servers
-    guild.channels.forEach((channel) => {
-      console.log(`-- ${channel.name} (${channel.type}) - ${channel.id}`);
-    })
-  })
+    // Set bot status to: "Loving you"
+    client.user.setActivity("you", {type: "Nothin but lovin'"})
 })
 
 client.on('message', (receivedMessage) => {
@@ -29,8 +13,7 @@ client.on('message', (receivedMessage) => {
     return;
   }
 
-  //Check for ! prefix
-  if (receivedMessage.content.startsWith("!")) {
+  if (receivedMessage.content.includes(client.user.toString())) {
     processCommand(receivedMessage);
   }
 })
@@ -81,4 +64,4 @@ function shoutCommand(arguments, receivedMessage) {
   }
 }
 
-client.login("NTM5NTk4NjI1MDI2ODY3MjQ5.DzFFYQ.IhFU6sLaAoeeYm6KQs8YSEoGfZU");
+client.login(process.env.TOKEN);
