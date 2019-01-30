@@ -4,9 +4,16 @@ const client = new Discord.Client();
 
 client.on('ready', () => {
     // Set bot status to: "Loving you"
-    client.user.setActivity("you", {type: "Nothin but lovin'"})
-})
+    client.user.setActivity("you", {type: "Nothin' but lovin'"})
 
+    //Output connection message (use to immediately test if bot is working)
+    /*To get the channel ID, right-click on the channel in the Discord app and
+    select [Copy ID]. Paste that inside the get() module as a string.*/
+
+    let testChannel = client.channels.get("539642539662245888");
+    testChannel.send("Connected...");
+})
+/*
 client.on('message', (receivedMessage) => {
   //Prevent bot from responding to itself
   if (receivedMessage.author == client.user) {
@@ -63,5 +70,5 @@ function shoutCommand(arguments, receivedMessage) {
      " wants me to tell you: " + arguments.toUpperCase());       //THIS DOESN'T WORK, FIX
   }
 }
-
+*/
 client.login(process.env.TOKEN);
