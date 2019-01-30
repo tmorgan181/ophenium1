@@ -41,14 +41,13 @@ function processCommand(receivedMessage) {
   let fullCommand = receivedMessage.content.slice(userLength);
   let splitCommand = fullCommand.split(" "); //split message at spaces
   let primaryCommand = splitCommand[0]; //first word is primary command
-  let arguments = splitCommand.slice(1); //rest of words are arguments
+  //The rest of the words become a string to be used as arguments
+  let secondaryCommands = splitCommand.slice(1).toString();
 
   if (primaryCommand == "help") {
-    receivedMessage.channel.send("You said help");
-    //helpCommand(arguments, receivedMessage);
+    //helpCommand(secondaryCommands, receivedMessage);
   } else if (primaryCommand == "shout") {
-    receivedMessage.channel.send("You said shout");
-    //shoutCommand(arguments, receivedMessage);
+    shoutCommand(secondaryCommands, receivedMessage);
   } else {
     receivedMessage.channel.send("Sorry, I don't understand your command. " +
     "It's likely due to the fact that I'm a stupid robot, " +
@@ -56,9 +55,9 @@ function processCommand(receivedMessage) {
   }
 }
 /*
-function helpCommand(arguments, receivedMessage) {
-  if (arguments.length > 0) {
-    switch (arguments.content.toString()) { //THIS DOESN'T WORK (i think), FIX
+function helpCommand(secondaryCommands, receivedMessage) {
+  if (secondaryCommands.length > 0) {
+    switch (secondaryCommands.toString()) { //THIS DOESN'T WORK (i think), FIX
       case "help":
         receivedMessage.channel.send("Well you obv already know how to use it");
         break;
@@ -74,15 +73,16 @@ function helpCommand(arguments, receivedMessage) {
      "\n`!help [command]`\n`!shout [message]`");
   }
 }
+*/
+function shoutCommand(secondaryCommands, receivedMessage) {
 
-function shoutCommand(arguments, receivedMessage) {
-  if (arguments.length == 0) {
+  //Check for the shouted message
+  if (secondaryCommands.length == 0) {
     receivedMessage.channel.send("You didn't give me anything to shout... " +
      "Lame.");
   } else {
-    receivedMessage.channel.send(receivedMessage.author.toString() +
-     " wants to say: " + arguments.toUpperCase()); //THIS DOESN'T WORK, FIX
+    receivedMessage.channel.send(`${secondaryCommands.toUpperCase()}`);
   }
 }
-*/
+
 client.login();
