@@ -64,8 +64,4 @@ function shoutCommand(arguments, receivedMessage) {
   }
 }
 
-<<<<<<< HEAD
 client.login(process.env.TOKEN);
-=======
-client.login("");
->>>>>>> bc929fb0aacdd81ab94f9b2ebdf17811f83047b1
