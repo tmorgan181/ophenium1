@@ -1,18 +1,31 @@
-require('dotenv').config;
+//test program from
+//https://github.com/AnIdiotsGuide/discordjs-bot-guide/blob/master/other-guides/env-files.md
+
 const Discord = require('discord.js');
+require('dotenv').config();
+
 const client = new Discord.Client();
 
+// "process.env" accesses the environment variables for the running node process. PREFIX is the environment variable you defined in your .env file
+const prefix = process.env.PREFIX;
+
 client.on('ready', () => {
-    // Set bot status to: "Loving you"
-    client.user.setActivity("you", {type: "Nothin' but lovin'"})
 
-    //Output connection message (use to immediately test if bot is working)
-    /*To get the channel ID, right-click on the channel in the Discord app and
-    select [Copy ID]. Paste that inside the get() module as a string.*/
+  //Output connection message
+  console.log(`Logged in as ${client.user.tag}!`);
 
-    let testChannel = client.channels.get("539642539662245888");
-    testChannel.send("Connected...");
-})
+  // Set bot status too "${type} arg1"
+  client.user.setActivity("Build-a-Bot");
+
+  /*To get the channel ID, right-click on the channel in the Discord app and
+  select [Copy ID]. Paste that inside the get() module as a string.*/
+
+  let testChannel = client.channels.get("539642539662245888");
+  testChannel.send("Connected...");
+});
+
+client.login();
+
 /*
 client.on('message', (receivedMessage) => {
   //Prevent bot from responding to itself
@@ -44,7 +57,7 @@ function processCommand(receivedMessage) {
 
 function helpCommand(arguments, receivedMessage) {
   if (arguments.length > 0) {
-    switch (arguments.content.toString()) {                                //THIS DOESN'T WORK (i think), FIX
+    switch (arguments.content.toString()) { //THIS DOESN'T WORK (i think), FIX
       case "help":
         receivedMessage.channel.send("Well you obv already know how to use it");
         break;
@@ -67,8 +80,7 @@ function shoutCommand(arguments, receivedMessage) {
      "Lame.");
   } else {
     receivedMessage.channel.send(receivedMessage.author.toString() +
-     " wants me to tell you: " + arguments.toUpperCase());       //THIS DOESN'T WORK, FIX
+     " wants to say: " + arguments.toUpperCase()); //THIS DOESN'T WORK, FIX
   }
 }
 */
-client.login(process.env.TOKEN);
