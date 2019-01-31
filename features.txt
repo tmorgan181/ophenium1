@@ -4,13 +4,14 @@
     Command System
       -This is the basis of Ophenium I (in theory), where most functions can be
        accessed
-      -As of now they are all prefaced with @Ophenium I#2737 to "call" him
+      -Prefixed with !
       -List of available commands:
-          shout [message]   //sends [message] in all caps to the calling channel
-                              (note: only kinda works. output LOOKS,LIKE,THIS)
-          help [command]    //lists commands and their descriptions or gives a
-                              detailed explanation of [command]
-
+          !help [command]  //Lists commands and their descriptions or gives a
+                             detailed explanation of [command]
+          !howdy           //Says partner back
+          !ping            //Says pong! back
+          !shout [message] //only kinda works, output LOOKS,LIKE,THIS when it
+                             should LOOK LIKE THIS
 
   PLANNED
     Random Stuff
