@@ -1,12 +1,8 @@
-//test program from
-//https://github.com/AnIdiotsGuide/discordjs-bot-guide/blob/master/other-guides/env-files.md
 
 const Discord = require('discord.js');
 require('dotenv').config();
 
 const client = new Discord.Client();
-
-// "process.env" accesses the environment variables for the running node process. PREFIX is the environment variable you defined in your .env file
 const prefix = process.env.PREFIX;
 
 client.on('ready', () => {
