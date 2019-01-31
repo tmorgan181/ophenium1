@@ -6,9 +6,10 @@
        accessed
       -As of now they are all prefaced with @Ophenium I#2737 to "call" him
       -List of available commands:
-          shout [message] //sends [message] in all caps to the calling channel
-          (coming soon) help [command] //lists commands and their descriptions or
-                                       //gives detailed explanation of [command]
+          shout [message]   //sends [message] in all caps to the calling channel
+                              (note: only kinda works. output LOOKS,LIKE,THIS)
+          help [command]    //lists commands and their descriptions or gives a
+                              detailed explanation of [command]
 
 
   PLANNED
