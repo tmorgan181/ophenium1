@@ -1,0 +1,24 @@
+#FEATURES
+
+  CURRENT
+    Command System
+      -This is the basis of Ophenium I (in theory), where most functions can be
+       accessed
+      -As of now they are all prefaced with @Ophenium I#2737 to "call" him
+      -List of available commands:
+          shout [message] //sends [message] in all caps to the calling channel
+          (coming soon) help [command] //lists commands and their descriptions or
+                                       //gives detailed explanation of [command]
+
+
+  PLANNED
+    Random Stuff
+      -Grab pictures from the internet and post them or something
+      -Play some music DJ
+      -this is it chief (whatever that means)
+
+    Maybe Long Road
+      -Role sort
+      -Channel creator/manager
+      -Some other useful stuff
+      -Probably something about mods are gay, thanks automod very cool
