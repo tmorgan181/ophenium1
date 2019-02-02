@@ -4,19 +4,20 @@
     Command System
       -This is the basis of Ophenium I (in theory), where most functions can be
        accessed
-      -Prefixed with !
       -List of available commands:
-          !help [command]  //Lists commands and their descriptions or gives a
-                             detailed explanation of [command]
-          !howdy           //Says partner back
-          !ping            //Says pong! back
-          !shout [message] //only kinda works, output LOOKS,LIKE,THIS when it
-                             should LOOK LIKE THIS
+          !help [command]   //Lists commands and their descriptions or gives a
+                              detailed explanation of [command]
+          !howdy            //Says partner back
+          !join             //Joins the caller's voice channel
+          !leave            //Leaves the caller's voice channel
+          !ping             //Says pong! back
+          !shout [message]  //only kinda works, output LOOKS,LIKE,THIS when it
+                              should LOOK LIKE THIS
 
   PLANNED
     Random Stuff
       -Grab pictures from the internet and post them or something
-      -Play some music DJ
+      -Play some music DJ (coming soon!)
       -this is it chief (whatever that means)
 
     Maybe Long Road
@@ -24,3 +25,13 @@
       -Channel creator/manager
       -Some other useful stuff
       -Probably something about mods are gay, thanks automod very cool
+
+  KNOWN BUGS
+    -There's lots of them. Surprise surprise lol.
+        -!shout command doesn't handle multi-word messages as desired
+            ex) `!shout hello world` becomes "HELLO,WORLD"
+        -!leave command can be issued and executed from any channel, not just
+         the one that Ophenium I is connected to
+        -There's no response/check if !join is called while bot is in the same
+         voice channel (seems that a lot of my headache comes from not knowing
+         how to find the id of the connected voice channel lol)

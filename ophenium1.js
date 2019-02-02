@@ -1,44 +1,50 @@
 const Discord = require('discord.js');
 require('dotenv').config();
 
-const client = new Discord.Client();
+const bot = new Discord.Client();
 const prefix = process.env.PREFIX;
 
-client.on('ready', () => {
+//Settings for activity
+const activity = "Build-a-Bot";
+const activityType = "Playing";
+
+
+
+bot.on('ready', () => {
 
   //Output connection message
-  console.log(`Logged in as ${client.user.tag}`);
+  console.log(`Logged in as ${bot.user.tag}`);
 
   //Set bot status (Default type is "Playing")
   //Alternatively, you can set the activity to any of the following:
   //PLAYING, STREAMING, LISTENING, WATCHING
   //For example:
-  //client.user.setActivity("TV", {type: "WATCHING"})*/
-  client.user.setActivity("Build-a-Bot");
+  //bot.user.setActivity("TV", {type: "WATCHING"})*/
+  bot.user.setActivity(`${activity}`, {type: `${activityType}`});
 
   /*To get the channel ID, right-click on the channel in the Discord app and
   select [Copy ID]. Paste that inside the get() function as a string.*/
 
-  /*let testChannel = client.channels.get("539642539662245888");
+  /*let testChannel = bot.channels.get("539642539662245888");
   testChannel.send("Connected...");*/
 });
 
-client.on('message', (receivedMessage) => {
+bot.on('message', (message) => {
 
   //Prevent bot from responding to itself
-  if (receivedMessage.author == client.user) {
+  if (message.author == bot.user) {
     return;
   }
 
   //Check then process commands starting with !
-  if (receivedMessage.content.startsWith("!")) {
-    processCommand(receivedMessage);
+  if (message.content.startsWith("!")) {
+    processCommand(message);
   }
 })
 
-function processCommand(receivedMessage) {
+function processCommand(message) {
 
-  let fullCommand = receivedMessage.content.slice(1);
+  let fullCommand = message.content.slice(1);
   let splitCommand = fullCommand.split(" "); //split message at spaces
   let primaryCommand = splitCommand[0]; //first word is primary command
   //The rest of the words become a string to be used as arguments
@@ -48,59 +54,114 @@ function processCommand(receivedMessage) {
   switch (primaryCommand) {
     case (""):
     case (" "):
-      receivedMessage.channel.send("You need to enter a command for me to do " +
+      message.channel.send("You need to enter a command for me to do " +
        "anything... Try `!help` if you're stuck");
       break;
     case "help":
-      helpCommand(secondaryCommands, receivedMessage);
+      helpCommand(secondaryCommands, message);
       break;
     case "howdy":
-      receivedMessage.channel.send("partner");
+      message.channel.send("partner");
+      break;
+    //should add check to join to see if the bot is already connected
+    case "join":
+      //Check if calling user is in voice channel
+      if (message.member.voiceChannel) {
+
+//hey hi this is the solution to my problems thanks              //!!!!!!!!!!!!
+console.log(`Joining channel ${message.member.voiceChannel}`);   //!!!!!!!!!!!!
+
+        joinCommand(message);
+      }
+      else {
+        message.channel.send("You need to join a voice channel first!");
+      }
+      break;
+    case "leave":
+      //Check if bot is connected to a voice channel
+      if (message.guild.voiceConnection) {
+        /*So this is the pain in the ass that I can't figure out. I'm
+        trying to check that the user and bot are in the same channel,
+        but I'm having no luck with what's there. I've tried getting
+        into the voiceConnection collection to grab the connected
+        channel's ID, but no dice. For now I think I'm just gonna check if
+        the user is connected to *any* voice channel at all for a small
+        preventative measure.
+
+        //if (channel.id ==
+        //    message.author.guildMember.voiceChannelID) {
+          //leaveCommand(message);
+        }
+        else {
+          message.channel.send("You must be in the same channel as me to make " +
+           "me leave.");
+        }*/
+
+        //This is the workaround for that earlier stuff: check if the user
+        //is connected to any voice channel
+        if (message.member.voiceChannel) {
+          leaveCommand(message);
+        }
+      }
+      else {
+        message.channel.send("I have to be in a voice channel to leave one!");
+      }
       break;
     case "ping":
-      pingCommand(receivedMessage);
+      message.channel.send("pong!");
       break;
     case "shout":
-      shoutCommand(secondaryCommands, receivedMessage);
+      shoutCommand(secondaryCommands, message);
       break;
     default:
-      receivedMessage.channel.send("Sorry, I don't understand your command. " +
+      message.channel.send("Sorry, I don't understand your command. " +
        "Make sure it's formatted as `![command] [arguments]`");
       break;
   }
 }
 
-function helpCommand(secondaryCommands, receivedMessage) {
+function helpCommand(secondaryCommands, message) {
 
-  //Here check for secondaryCommands and act based their presence and value
+  //Here check for secondaryCommands and act based on its presence and value
   if (secondaryCommands.length > 0) {
     switch (secondaryCommands) {
       case "help":
-        receivedMessage.channel.send("Well you obv already know how to use it");
+        message.channel.send("Well you obv already know how to use it");
         break;
       case "howdy":
-        receivedMessage.channel.send("`!howdy` doesn't have any real purpose" +
+        message.channel.send("`!howdy` doesn't have any real purpose" +
          ", it just makes me say \"partner\"");
         break;
+      case "join":
+        message.channel.send("`!join` makes me join the caller's voice " +
+         "channel and can only be activated if they are in one");
+        break;
+      case "leave":
+        message.channel.send("`!leave` makes me leave the caller's voice " +
+         "channel and can only be activated if they are in the same channel " +
+          "as me");
+        break;
       case "ping":
-        receivedMessage.channel.send("`!ping` doesn't have any real purpose" +
+        message.channel.send("`!ping` doesn't have any real purpose" +
          ", it just makes me say \"pong!\"");
         break;
       case "shout":
-        receivedMessage.channel.send("`!shout [message]` simply makes me repeat"
+        message.channel.send("`!shout [message]` simply makes me repeat"
          + " `[message]` in all caps. It will be sent to the channel that "
          + "calls me");
         break;
       default:
-        receivedMessage.channel.send("Sorry, I don't know that command...");
+        message.channel.send("Sorry, I don't know that command...");
     }
   }
   else { //if no secondaryCommands, output list of commands
-    receivedMessage.channel.send("Current list of commands (used with " +
+    message.channel.send("Current list of commands (used with " +
      "`![command] [arguments]`):" +
      "\n\n`!help [command]`\t-Lists commands and their descriptions or gives " +
      " a detailed explanation of [command]" +
      "\n`!howdy`\t-Makes me say \"partner\"" +
+     "\n`!join`\t-Makes me join the caller's voice channel" +
+     "\n`!leave`\t-Makes me leave the caller's voice channel" +
      "\n`!ping`\t-Makes me say \"pong!\"" +
      "\n`!shout [message]` \t-Sends [message] in all caps to the channel I " +
      "was called from" +
@@ -109,21 +170,36 @@ function helpCommand(secondaryCommands, receivedMessage) {
   }
 }
 
-function shoutCommand(secondaryCommands, receivedMessage) {
+function joinCommand(message) {
+
+  //Join channel
+  message.member.voiceChannel.join()
+    .then(connection => {
+    });
+
+  //Set activity to "Playing Funky Tunes"
+  bot.user.setActivity("Funky Tunes");
+}
+
+function leaveCommand(message) {
+
+  //Leave channel
+  message.guild.voiceConnection.disconnect();
+
+  //Reset activity
+  bot.user.setActivity(`${activity}`, {type: `${activityType}`});
+}
+
+function shoutCommand(secondaryCommands, message) {
 
   //Check for the shouted message
   if (secondaryCommands.length == 0) {
-    receivedMessage.channel.send("You didn't give me anything to shout...");
+    message.channel.send("You didn't give me anything to shout...");
   }
   else { //format issue here, output LOOKS,LIKE,THIS
-    receivedMessage.channel.send(`${secondaryCommands.toUpperCase()}`);
+    let newMessage = secondaryCommands.toUpperCase();
+    message.channel.send(`${newMessage}`);
   }
 }
 
-function pingCommand(receivedMessage) {
-
-    //Simple return message
-    receivedMessage.channel.send("pong!");
-}
-
-client.login();
+bot.login();
