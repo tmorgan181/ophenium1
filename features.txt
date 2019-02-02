@@ -10,13 +10,14 @@
           !howdy            //Says partner back
           !join             //Joins the caller's voice channel
           !leave            //Leaves the caller's voice channel
+          !play [link]      //Plays [link] in the connected voice channel (note:
+                              currently only works with youtube links)
           !ping             //Says pong! back
           !shout [message]  //Sends [message] in all caps
 
   PLANNED
     Random Stuff
       -Grab pictures from the internet and post them or something
-      -Play some music DJ (coming soon-ish!)
       -this is it chief (whatever that means)
 
     Maybe Long Road
@@ -26,10 +27,15 @@
       -Probably something about mods are gay, thanks automod very cool
 
   KNOWN BUGS
-    -Wowie look at this empty list
+    Music
+      -Songs cannot be queued, running !play twice in a row crashes bot (but hey
+       at least it can play one song)
+      -Not really a bug, but there's no !stop command, so in order to make the
+       bot quit playing audio, must use !leave
 
   FIXED BUGS
-    -!leave works as intended now! How exciting!
-    -!join now has a check to make sure the user and bot are not in the same
-     voice channel
-    -!shout works as intended
+    01/31/19 - 02/01/19
+      -!leave works as intended now! How exciting!
+      -!join now has a check to make sure the user and bot are not in the same
+      voice channel
+      -!shout works as intended

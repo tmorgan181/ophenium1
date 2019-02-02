@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const YTDL = require("ytdl-core");
 require('dotenv').config();
 
 const bot = new Discord.Client();
@@ -11,6 +12,11 @@ const activityType = "Playing";
 //Global vars for connecting to/checking voice channels
 var connectedChannel = undefined;
 var connectionStatus = undefined;
+
+
+var servers = {
+  queue: []
+};
 
 bot.on('ready', () => {
 
@@ -36,6 +42,9 @@ bot.on('message', (message) => {
   if (message.content.startsWith("!")) {
     processCommand(message);
   }
+  else {
+    return;
+  }
 })
 
 function processCommand(message) {
@@ -44,10 +53,10 @@ function processCommand(message) {
   let splitCommand = fullCommand.split(" "); //split message at spaces
   let primaryCommand = splitCommand[0]; //first word is primary command
   //The rest of the words become a string to be used as arguments
-  let secondaryCommands = splitCommand.slice(1).toString();
+  let args = splitCommand.slice(1).toString();
 
   //Check primaryCommand and act accordingly
-  switch (primaryCommand) {
+  switch (primaryCommand.toLowerCase()) {
     case (""):
     case (" "):
       message.channel.send("You need to enter a command for me to do " +
@@ -60,7 +69,7 @@ function processCommand(message) {
       break;
 
     case "help":
-      helpCommand(secondaryCommands, message);
+      helpCommand(args, message);
       break;
 
     case "howdy":
@@ -84,11 +93,10 @@ function processCommand(message) {
       break;
 
     case "leave":
-      //Check if bot is connected to the same voice channel
-      if (message.member.voiceChannel) {
-        //Check if bot is connected to the same voice channel as caller
-        if (connectionStatus == "connected" &&
-            message.member.voiceChannel == connectedChannel) {
+      //Check if bot is connected to a voice channel
+      if (connectionStatus == "connected") {
+        //Check if bot is connected to same channel as caller
+        if (message.member.voiceChannel == connectedChannel) {
           leaveCommand(message);
         }
         else {
@@ -101,15 +109,49 @@ function processCommand(message) {
       }
       break;
 
-    case "link":
-      manageMusic(secondaryCommands)
+    case "play":
+      //Note: a lot of syntax for this command came from
+      // https://www.youtube.com/watch?v=z4S2qqX7YvA
+      //check there if stuff breaks
+
+      if (!args[0]) { //check for link
+        message.channel.send("Please provide the link to a song (for help " +
+         "type `!help play`)");
+        return;
+      }
+      if (!message.member.voiceChannel) { //check user is in voice channel
+        message.channel.send("You must be in a voice channel first!")
+        return;
+      }
+      if (connectionStatus != "connected") { //check bot is in voice channel
+        message.channel.send("I must be in a voice channel first! (Make me " +
+        "join yours with `!join`)");
+        return;
+      }
+      //Check that bot and user are in same channel
+      if (connectedChannel != message.member.voiceChannel) {
+        message.channel.send("We must be in the same voice channel to use " +
+         "this command.")
+        return;
+      }
+      //Check if server object is defined
+      if (!servers[message.guild.id]) {
+        servers[message.guild.id] = {
+          queue: []
+        }
+      }
+
+      var server = servers[message.guild.id];
+      server.queue.push(message.content.slice(5));
+      playCommand(message);
+      break;
 
     case "ping":
       message.channel.send("pong!");
       break;
 
     case "shout":
-      shoutCommand(secondaryCommands, message);
+      shoutCommand(args, message);
       break;
 
     default:
@@ -119,11 +161,11 @@ function processCommand(message) {
   }
 }
 
-function helpCommand(secondaryCommands, message) {
+function helpCommand(args, message) {
 
-  //Here check for secondaryCommands and act based on its presence and value
-  if (secondaryCommands.length > 0) {
-    switch (secondaryCommands) {
+  //Here check for args and act based on its presence and value
+  if (args.length > 0) {
+    switch (args) {
       case "help":
         message.channel.send("Well you obv already know how to use it :)");
         break;
@@ -144,6 +186,10 @@ function helpCommand(secondaryCommands, message) {
           "me");
         break;
 
+      case "play":
+        message.channel.send("`!play [link]` will play audio from [link] " +
+         "(currently only works with Youtube links, and queue is disabled)");
+
       case "ping":
         message.channel.send("`!ping` doesn't have any real purpose" +
          ", it just makes me say \"pong!\"");
@@ -156,11 +202,11 @@ function helpCommand(secondaryCommands, message) {
         break;
 
       default:
-        message.channel.send(`Sorry, \`${secondaryCommands}\` not one of my ` +
-         "commands. For a full list of commands type `!help`");
+        message.channel.send(`Sorry, \`${message.content.slice(5)}\` is not ` +
+        "one of my commands. For a full list of commands type `!help`");
     }
   }
-  else { //if no secondaryCommands, output list of commands
+  else { //if no args, output list of commands
     message.channel.send("Current list of commands (used with " +
      "`![command] [arguments]`):" +
      "\n\n`!help [command]`\t-Lists commands and their descriptions or gives " +
@@ -168,6 +214,7 @@ function helpCommand(secondaryCommands, message) {
      "\n`!howdy`\t-Makes me say \"partner\"" +
      "\n`!join`\t-Makes me join the caller's voice channel" +
      "\n`!leave`\t-Makes me leave the caller's voice channel" +
+     "\n`!play [link]`\t-Plays audio from [link]" +
      "\n`!ping`\t-Makes me say \"pong!\"" +
      "\n`!shout [message]` \t-Sends [message] in all caps to the channel I " +
      "was called from" +
@@ -204,10 +251,28 @@ function leaveCommand(message) {
   bot.user.setActivity(`${activity}`, {type: `${activityType}`});
 }
 
-function shoutCommand(secondaryCommands, message) {
+function playCommand(message) {
+  var server = servers[message.guild.id];
+
+  server.dispatcher =
+   message.guild.voiceConnection.playStream(YTDL(server.queue[0], {filter: "audioonly"}));
+
+  server.queue.shift();
+
+  server.dispatcher.on("end", () => {
+    if (server.queue[0]) {
+      playCommand(message);
+    }
+    else {
+      leaveCommand(message)
+    }
+  })
+}
+
+function shoutCommand(args, message) {
 
   //Check for the shouted message
-  if (secondaryCommands.length == 0) {
+  if (args.length == 0) {
     message.channel.send("You didn't give me anything to shout...");
   }
   else {
