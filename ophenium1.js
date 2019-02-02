@@ -8,12 +8,14 @@ const prefix = process.env.PREFIX;
 const activity = "Build-a-Bot";
 const activityType = "Playing";
 
-
+//Global vars for connecting to/checking voice channels
+var connectedChannel = undefined;
+var connectionStatus = undefined;
 
 bot.on('ready', () => {
 
   //Output connection message
-  console.log(`Logged in as ${bot.user.tag}`);
+  console.log(`${bot.user.tag} ready`);
 
   //Set bot status (Default type is "Playing")
   //Alternatively, you can set the activity to any of the following:
@@ -21,12 +23,6 @@ bot.on('ready', () => {
   //For example:
   //bot.user.setActivity("TV", {type: "WATCHING"})*/
   bot.user.setActivity(`${activity}`, {type: `${activityType}`});
-
-  /*To get the channel ID, right-click on the channel in the Discord app and
-  select [Copy ID]. Paste that inside the get() function as a string.*/
-
-  /*let testChannel = bot.channels.get("539642539662245888");
-  testChannel.send("Connected...");*/
 });
 
 bot.on('message', (message) => {
@@ -57,62 +53,57 @@ function processCommand(message) {
       message.channel.send("You need to enter a command for me to do " +
        "anything... Try `!help` if you're stuck");
       break;
+
     case "help":
       helpCommand(secondaryCommands, message);
       break;
+
     case "howdy":
       message.channel.send("partner");
       break;
-    //should add check to join to see if the bot is already connected
+
     case "join":
-      //Check if calling user is in voice channel
+      //Check if calling user is in a voice channel
       if (message.member.voiceChannel) {
-
-//hey hi this is the solution to my problems thanks              //!!!!!!!!!!!!
-console.log(`Joining channel ${message.member.voiceChannel}`);   //!!!!!!!!!!!!
-
-        joinCommand(message);
-      }
-      else {
-        message.channel.send("You need to join a voice channel first!");
-      }
-      break;
-    case "leave":
-      //Check if bot is connected to a voice channel
-      if (message.guild.voiceConnection) {
-        /*So this is the pain in the ass that I can't figure out. I'm
-        trying to check that the user and bot are in the same channel,
-        but I'm having no luck with what's there. I've tried getting
-        into the voiceConnection collection to grab the connected
-        channel's ID, but no dice. For now I think I'm just gonna check if
-        the user is connected to *any* voice channel at all for a small
-        preventative measure.
-
-        //if (channel.id ==
-        //    message.author.guildMember.voiceChannelID) {
-          //leaveCommand(message);
+        //Check if bot is already connected to that channel
+        if (connectedChannel != message.member.voiceChannel) {
+          joinCommand(message);
         }
         else {
-          message.channel.send("You must be in the same channel as me to make " +
-           "me leave.");
-        }*/
+          message.channel.send("I'm already in your channel!")
+        }
+      }
+      else {
+        message.channel.send("You need to join a voice channel first.");
+      }
+      break;
 
-        //This is the workaround for that earlier stuff: check if the user
-        //is connected to any voice channel
-        if (message.member.voiceChannel) {
+    case "leave":
+      //Check if bot is connected to the same voice channel
+      if (message.member.voiceChannel) {
+        //Check if bot is connected to the same voice channel as caller
+        if (connectionStatus == "connected" &&
+            message.member.voiceChannel == connectedChannel) {
           leaveCommand(message);
+        }
+        else {
+          message.channel.send("You have to be in the same channel as me to " +
+           "tell me to leave.");
         }
       }
       else {
         message.channel.send("I have to be in a voice channel to leave one!");
       }
       break;
+
     case "ping":
       message.channel.send("pong!");
       break;
+
     case "shout":
       shoutCommand(secondaryCommands, message);
       break;
+
     default:
       message.channel.send("Sorry, I don't understand your command. " +
        "Make sure it's formatted as `![command] [arguments]`");
@@ -126,30 +117,36 @@ function helpCommand(secondaryCommands, message) {
   if (secondaryCommands.length > 0) {
     switch (secondaryCommands) {
       case "help":
-        message.channel.send("Well you obv already know how to use it");
+        message.channel.send("Well you obv already know how to use it :)");
         break;
+
       case "howdy":
         message.channel.send("`!howdy` doesn't have any real purpose" +
          ", it just makes me say \"partner\"");
         break;
+
       case "join":
         message.channel.send("`!join` makes me join the caller's voice " +
          "channel and can only be activated if they are in one");
         break;
+
       case "leave":
         message.channel.send("`!leave` makes me leave the caller's voice " +
-         "channel and can only be activated if they are in the same channel " +
-          "as me");
+         "channel and can only be activated if they are in the same one as " +
+          "me");
         break;
+
       case "ping":
         message.channel.send("`!ping` doesn't have any real purpose" +
          ", it just makes me say \"pong!\"");
         break;
+
       case "shout":
         message.channel.send("`!shout [message]` simply makes me repeat"
          + " `[message]` in all caps. It will be sent to the channel that "
          + "calls me");
         break;
+
       default:
         message.channel.send("Sorry, I don't know that command...");
     }
@@ -177,6 +174,10 @@ function joinCommand(message) {
     .then(connection => {
     });
 
+  //Set connection status and channel
+  connectionStatus = "connected";
+  connectedChannel = message.member.voiceChannel;
+
   //Set activity to "Playing Funky Tunes"
   bot.user.setActivity("Funky Tunes");
 }
@@ -185,6 +186,10 @@ function leaveCommand(message) {
 
   //Leave channel
   message.guild.voiceConnection.disconnect();
+
+  //Reset connection status and channel
+  connectionStatus = "disconnected";
+  connectedChannel = undefined;
 
   //Reset activity
   bot.user.setActivity(`${activity}`, {type: `${activityType}`});

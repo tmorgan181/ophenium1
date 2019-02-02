@@ -20,6 +20,10 @@
       -Play some music DJ (coming soon!)
       -this is it chief (whatever that means)
 
+    Actually Achievable Kinda Soon
+      -Welcome message
+      -thats all i got for now :shrug:
+
     Maybe Long Road
       -Role sort
       -Channel creator/manager
@@ -27,11 +31,11 @@
       -Probably something about mods are gay, thanks automod very cool
 
   KNOWN BUGS
-    -There's lots of them. Surprise surprise lol.
+    -There's less of them now! But the list will inevitably grow again
         -!shout command doesn't handle multi-word messages as desired
             ex) `!shout hello world` becomes "HELLO,WORLD"
-        -!leave command can be issued and executed from any channel, not just
-         the one that Ophenium I is connected to
-        -There's no response/check if !join is called while bot is in the same
-         voice channel (seems that a lot of my headache comes from not knowing
-         how to find the id of the connected voice channel lol)
+
+  FIXED BUGS
+    -!leave works as intended now! How exciting!
+    -!join now has a check to make sure the user and bot are not in the same
+     voice channel
