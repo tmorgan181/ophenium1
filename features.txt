@@ -11,18 +11,13 @@
           !join             //Joins the caller's voice channel
           !leave            //Leaves the caller's voice channel
           !ping             //Says pong! back
-          !shout [message]  //only kinda works, output LOOKS,LIKE,THIS when it
-                              should LOOK LIKE THIS
+          !shout [message]  //Sends [message] in all caps
 
   PLANNED
     Random Stuff
       -Grab pictures from the internet and post them or something
-      -Play some music DJ (coming soon!)
+      -Play some music DJ (coming soon-ish!)
       -this is it chief (whatever that means)
-
-    Actually Achievable Kinda Soon
-      -Welcome message
-      -thats all i got for now :shrug:
 
     Maybe Long Road
       -Role sort
@@ -31,11 +26,10 @@
       -Probably something about mods are gay, thanks automod very cool
 
   KNOWN BUGS
-    -There's less of them now! But the list will inevitably grow again
-        -!shout command doesn't handle multi-word messages as desired
-            ex) `!shout hello world` becomes "HELLO,WORLD"
+    -Wowie look at this empty list
 
   FIXED BUGS
     -!leave works as intended now! How exciting!
     -!join now has a check to make sure the user and bot are not in the same
      voice channel
+    -!shout works as intended

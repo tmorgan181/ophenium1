@@ -54,6 +54,11 @@ function processCommand(message) {
        "anything... Try `!help` if you're stuck");
       break;
 
+    case "gey":
+    case "gay":
+      message.channel.send("No u");
+      break;
+
     case "help":
       helpCommand(secondaryCommands, message);
       break;
@@ -95,6 +100,9 @@ function processCommand(message) {
         message.channel.send("I have to be in a voice channel to leave one!");
       }
       break;
+
+    case "link":
+      manageMusic(secondaryCommands)
 
     case "ping":
       message.channel.send("pong!");
@@ -148,7 +156,8 @@ function helpCommand(secondaryCommands, message) {
         break;
 
       default:
-        message.channel.send("Sorry, I don't know that command...");
+        message.channel.send(`Sorry, \`${secondaryCommands}\` not one of my ` +
+         "commands. For a full list of commands type `!help`");
     }
   }
   else { //if no secondaryCommands, output list of commands
@@ -169,7 +178,7 @@ function helpCommand(secondaryCommands, message) {
 
 function joinCommand(message) {
 
-  //Join channel
+  //Join channel (this is a magic function, idk how it actually works lol)
   message.member.voiceChannel.join()
     .then(connection => {
     });
@@ -201,9 +210,10 @@ function shoutCommand(secondaryCommands, message) {
   if (secondaryCommands.length == 0) {
     message.channel.send("You didn't give me anything to shout...");
   }
-  else { //format issue here, output LOOKS,LIKE,THIS
-    let newMessage = secondaryCommands.toUpperCase();
-    message.channel.send(`${newMessage}`);
+  else {
+    //Get [message] only and turn to upper case
+    let newMessage = message.content.slice(7);
+    message.channel.send(`${newMessage.toUpperCase()}`);
   }
 }
 
