@@ -34,8 +34,12 @@
   KNOWN BUGS
     Music
       -Using !play only plays the first song in the queue (non-fatal bug)
+      -Using !play while a song is playing crashes the bot
       -Not really a bug, but there's no !stop command, so in order to make the
        bot quit playing audio, must use !leave
+       
+    Misc
+      -My GCP instance doesn't seem to like Ophenium very much
 
   FIXED BUGS
     01/31/19 - 02/01/19
