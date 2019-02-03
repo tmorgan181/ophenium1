@@ -63,17 +63,16 @@ function processCommand(message) {
        "anything... Try `!help` if you're stuck");
       break;
 
-    case "gey":
-    case "gay":
-      message.channel.send("No u");
-      break;
-
     case "help":
       helpCommand(args, message);
       break;
 
     case "howdy":
       message.channel.send("partner");
+      break;
+
+    case "iloveyou":
+      message.channel.send(":heart: :blush:");
       break;
 
     case "join":
@@ -110,13 +109,18 @@ function processCommand(message) {
       break;
 
     case "play":
-      //Note: a lot of syntax for this command came from
-      // https://www.youtube.com/watch?v=z4S2qqX7YvA
-      //check there if stuff breaks
+      //Check if queue exists
+      if (!servers[message.guild.id]) {
+        message.channel.send("Please add a song to the queue first with " +
+         "`!queue [link]`");
+        return;
+      }
 
-      if (!args[0]) { //check for link
-        message.channel.send("Please provide the link to a song (for help " +
-         "type `!help play`)");
+      var server = servers[message.guild.id];
+      //Check if queue is empty
+      if (!server.queue.length) {
+        message.channel.send("The queue is empty! Add a song to it with " +
+         "`!queue [link]`");
         return;
       }
       if (!message.member.voiceChannel) { //check user is in voice channel
@@ -134,7 +138,19 @@ function processCommand(message) {
          "this command.")
         return;
       }
-      //Check if server object is defined
+
+      var server = servers[message.guild.id];
+      playCommand(server, message);
+      break;
+
+    case "queue":
+      //Check if link is from Youtube (kinda)
+      if (!message.content.includes("www.youtube.com")) {
+        message.channel.send("Please enter a link from youtube.com");
+        return;
+      }
+
+      //Check if server object is defined, create it if not
       if (!servers[message.guild.id]) {
         servers[message.guild.id] = {
           queue: []
@@ -142,8 +158,27 @@ function processCommand(message) {
       }
 
       var server = servers[message.guild.id];
-      server.queue.push(message.content.slice(5));
-      playCommand(message);
+      //Add link to end of queue array
+      server.queue.push(message.content.slice(6));
+      message.channel.send("Your song has been added. There are currently " +
+       `${server.queue.length} songs in the queue.`);
+      break;
+
+    case "qstatus":
+      //Check if a queue exists
+      if (!servers[message.guild.id]) {
+        message.channel.send("There is currently no queue. Create one with " +
+         "`!queue [link]`");
+        return;
+      }
+
+      var server = servers[message.guild.id];
+      message.channel.send(`There are currently ${server.queue.length} songs ` +
+       "in the queue.");
+      break;
+
+    case "modsrgay":  //heh you found my easter egg
+      message.channel.send("It is known");
       break;
 
     case "ping":
@@ -187,8 +222,19 @@ function helpCommand(args, message) {
         break;
 
       case "play":
-        message.channel.send("`!play [link]` will play audio from [link] " +
-         "(currently only works with Youtube links, and queue is disabled)");
+        message.channel.send("`!play` causes the first song in the queue to " +
+         "play unless the queue is empty");
+        break;
+
+      case "queue":
+        message.channel.send("`!queue [link]` adds [link] to the end of the " +
+         "queue");
+        break;
+
+      case "qstatus":
+        message.channel.send("`!qstatus` displays how many songs are " +
+         "currently in the queue");
+        break;
 
       case "ping":
         message.channel.send("`!ping` doesn't have any real purpose" +
@@ -214,7 +260,9 @@ function helpCommand(args, message) {
      "\n`!howdy`\t-Makes me say \"partner\"" +
      "\n`!join`\t-Makes me join the caller's voice channel" +
      "\n`!leave`\t-Makes me leave the caller's voice channel" +
-     "\n`!play [link]`\t-Plays audio from [link]" +
+     "\n`!play`\t-Plays the first song in the queue" +
+     "\n`!queue [link]`\t-Adds [link] to the back of the queue" +
+     "\n`!qstatus`\t-Tells how many songs are in the queue" +
      "\n`!ping`\t-Makes me say \"pong!\"" +
      "\n`!shout [message]` \t-Sends [message] in all caps to the channel I " +
      "was called from" +
@@ -233,9 +281,6 @@ function joinCommand(message) {
   //Set connection status and channel
   connectionStatus = "connected";
   connectedChannel = message.member.voiceChannel;
-
-  //Set activity to "Playing Funky Tunes"
-  bot.user.setActivity("Funky Tunes");
 }
 
 function leaveCommand(message) {
@@ -251,11 +296,12 @@ function leaveCommand(message) {
   bot.user.setActivity(`${activity}`, {type: `${activityType}`});
 }
 
-function playCommand(message) {
-  var server = servers[message.guild.id];
+function playCommand(server, message) {
 
+  //Play first link in queue (audio only)
   server.dispatcher =
-   message.guild.voiceConnection.playStream(YTDL(server.queue[0], {filter: "audioonly"}));
+   message.guild.voiceConnection.playStream(YTDL(server.queue[0],
+    {filter: "audioonly"}));
 
   server.queue.shift();
 
@@ -264,9 +310,12 @@ function playCommand(message) {
       playCommand(message);
     }
     else {
-      leaveCommand(message)
+      return;
     }
   })
+
+  //Set activity to "Playing Funky Tunes"
+  bot.user.setActivity("Funky Tunes");
 }
 
 function shoutCommand(args, message) {

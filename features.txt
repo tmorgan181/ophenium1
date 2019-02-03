@@ -10,12 +10,17 @@
           !howdy            //Says partner back
           !join             //Joins the caller's voice channel
           !leave            //Leaves the caller's voice channel
-          !play [link]      //Plays [link] in the connected voice channel (note:
-                              currently only works with youtube links)
+          !play             //Plays the first song in the queue if there is one
+          !queue [link]     //Adds [link] to the back of the queue
           !ping             //Says pong! back
           !shout [message]  //Sends [message] in all caps
 
   PLANNED
+    Near Future
+      -Add skip, stop, and clear queue commands for music
+      -Add music info command to get song name, channel, etc (gonna need to
+       replace ytdl with something else i think)
+
     Random Stuff
       -Grab pictures from the internet and post them or something
       -this is it chief (whatever that means)
@@ -28,8 +33,7 @@
 
   KNOWN BUGS
     Music
-      -Songs cannot be queued, running !play twice in a row crashes bot (but hey
-       at least it can play one song)
+      -Using !play only plays the first song in the queue (non-fatal bug)
       -Not really a bug, but there's no !stop command, so in order to make the
        bot quit playing audio, must use !leave
 
