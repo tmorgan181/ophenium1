@@ -78,16 +78,18 @@ function processCommand(message) {
     case "join":
       //Check if calling user is in a voice channel
       if (message.member.voiceChannel) {
-        //Check if bot is already connected to that channel
+        //Check if bot is connected to that channel as well
         if (connectedChannel != message.member.voiceChannel) {
           joinCommand(message);
         }
         else {
           message.channel.send("I'm already in your channel!")
+          return;
         }
       }
       else {
         message.channel.send("You need to join a voice channel first.");
+        return;
       }
       break;
 
@@ -101,26 +103,32 @@ function processCommand(message) {
         else {
           message.channel.send("You have to be in the same channel as me to " +
            "tell me to leave.");
+          return;
         }
       }
       else {
         message.channel.send("I have to be in a voice channel to leave one!");
+        return;
       }
       break;
 
     case "play":
-      //Check if queue exists
+      //Check if server is defined
       if (!servers[message.guild.id]) {
         message.channel.send("Please add a song to the queue first with " +
          "`!queue [link]`");
         return;
       }
-
       var server = servers[message.guild.id];
       //Check if queue is empty
       if (!server.queue.length) {
         message.channel.send("The queue is empty! Add a song to it with " +
          "`!queue [link]`");
+        return;
+      }
+      //Check if music is already playing
+      if (server.dispatcher) {
+        message.channel.send("I'm already playing the queue.")
         return;
       }
       if (!message.member.voiceChannel) { //check user is in voice channel
@@ -138,25 +146,22 @@ function processCommand(message) {
          "this command.")
         return;
       }
-
-      var server = servers[message.guild.id];
+      //Finally, if all checks pass, play the queue
       playCommand(server, message);
       break;
 
     case "queue":
-      //Check if link is from Youtube (kinda)
+      //Check if link is from Youtube
       if (!message.content.includes("www.youtube.com")) {
         message.channel.send("Please enter a link from youtube.com");
         return;
       }
-
       //Check if server object is defined, create it if not
       if (!servers[message.guild.id]) {
         servers[message.guild.id] = {
           queue: []
         }
       }
-
       var server = servers[message.guild.id];
       //Add link to end of queue array
       server.queue.push(message.content.slice(6));
@@ -171,10 +176,118 @@ function processCommand(message) {
          "`!queue [link]`");
         return;
       }
-
       var server = servers[message.guild.id];
       message.channel.send(`There are currently ${server.queue.length} songs ` +
        "in the queue.");
+      break;
+
+    case "clearq":
+      //Check if server queue is defined
+      if (!servers[message.guild.id]) {
+        message.channel.send("There is no queue to clear! (Make one with " +
+         "`!queue [link]`)");
+        return;
+      }
+      var server = servers[message.guild.id];
+      if (server.queue.length) {
+        server.queue.length = 0;
+        message.channel.send("Queue successfully cleared!");
+      }
+      else {
+        message.channel.send("The queue is already empty!");
+        return;
+      }
+      break;
+
+    case "pause":
+      //Check that bot and user are in same channel
+      if (connectedChannel != message.member.voiceChannel) {
+        message.channel.send("We must be in the same voice channel to use " +
+         "this command.")
+        return;
+      }
+      //Check if server is defined
+      if (!servers[message.guild.id]) {
+        message.channel.send("There is no music playing.");
+        return;
+      }
+      var server = servers[message.guild.id];
+      //Check if dispatcher exists
+      if (!server.dispatcher) {
+        message.channel.send("There is no music playing.");
+        return;
+      }
+      //Check if already paused
+      if (server.dispatcher.paused) {
+        message.channel.send("The music is already paused.")
+        return;
+      }
+      //Pause if all checks pass, send confirmation
+      server.dispatcher.pause();
+      message.channel.send("Paused");
+      break;
+
+    case "resume":
+      //Check that bot and user are in same channel
+      if (connectedChannel != message.member.voiceChannel) {
+        message.channel.send("We must be in the same voice channel to use " +
+         "this command.")
+        return;
+      }
+      //Check if server is defined
+      if (!servers[message.guild.id]) {
+        message.channel.send("There is no music to resume.");
+        return;
+      }
+      var server = servers[message.guild.id];
+      //Check if dispatcher exists
+      if (!server.dispatcher) {
+        message.channel.send("You must start playing music first. (Do so with " +
+         "`!play`)");
+        return;
+      }
+      //Check if already playing
+      if (!server.dispatcher.paused) {
+        message.channel.send("Music is already playing!")
+        return;
+      }
+      //Resume if all checks pass, send confirmation
+      server.dispatcher.resume();
+      message.channel.send("Resumed");
+      break;
+
+    case "skip":
+      //Check if server is defined
+      if (!servers[message.guild.id]) {
+        message.channel.send("There are no songs in the queue, so I can't " +
+         "skip.");
+        return;
+      }
+      var server = servers[message.guild.id];
+      //Check if a song is playing
+      if (server.dispatcher) {
+        server.dispatcher.end();
+      }
+      else {
+        message.channel.send("I'm not playing anything right now! (Use " +
+        "`!play` to play what's in the queue)");
+      }
+      break;
+
+    case "stop":
+      //Check if server is defined
+      if (!servers[message.guild.id]) {
+        message.channel.send("There is nothing playing right now.");
+        return;
+      }
+      var server = servers[message.guild.id];
+      if (!server.dispatcher) {
+        message.channel.send("I'm not playing anything right now!");
+        return;
+      }
+      if (message.guild.voiceConnection) {
+        leaveCommand(message);
+      }
       break;
 
     case "modsrgay":  //heh you found my easter egg
@@ -226,6 +339,23 @@ function helpCommand(args, message) {
          "play unless the queue is empty");
         break;
 
+      case "pause":
+        message.channel.send("`!pause` pauses the current song");
+        break;
+
+      case "resume":
+        message.channel.send("`!resume` resumes the current song");
+        break;
+
+      case "skip":
+        message.channel.send("`!skip` skips the current song");
+        break;
+
+      case "stop":
+        message.channel.send("`!stop` ends the music stream and makes me " +
+         "leave the voice channel");
+        break;
+
       case "queue":
         message.channel.send("`!queue [link]` adds [link] to the end of the " +
          "queue");
@@ -234,6 +364,10 @@ function helpCommand(args, message) {
       case "qstatus":
         message.channel.send("`!qstatus` displays how many songs are " +
          "currently in the queue");
+        break;
+
+      case "clearq":
+        message.channel.send("`!clearq` clears the song queue");
         break;
 
       case "ping":
@@ -261,8 +395,13 @@ function helpCommand(args, message) {
      "\n`!join`\t-Makes me join the caller's voice channel" +
      "\n`!leave`\t-Makes me leave the caller's voice channel" +
      "\n`!play`\t-Plays the first song in the queue" +
+     "\n`!pause`\t-Pauses the current song" +
+     "\n`!resume`\t-Resumes the current song" +
+     "\n`!skip`\t-Skips the current song" +
+     "\n`!stop`\t-Stops playing music, makes me leave the voice channel" +
      "\n`!queue [link]`\t-Adds [link] to the back of the queue" +
      "\n`!qstatus`\t-Tells how many songs are in the queue" +
+     "\n`!clearq`\t-Clears the queue" +
      "\n`!ping`\t-Makes me say \"pong!\"" +
      "\n`!shout [message]` \t-Sends [message] in all caps to the channel I " +
      "was called from" +
@@ -303,13 +442,18 @@ function playCommand(server, message) {
    message.guild.voiceConnection.playStream(YTDL(server.queue[0],
     {filter: "audioonly"}));
 
+  //Remove first element of queue
   server.queue.shift();
 
   server.dispatcher.on("end", () => {
     if (server.queue[0]) {
-      playCommand(message);
+      playCommand(server, message);
     }
     else {
+      message.channel.send("The queue is now empty. Add more songs with " +
+       `!queue [link]`);
+      //Reset bot activity
+      bot.user.setActivity(`${activity}`, {type: `${activityType}`});
       return;
     }
   })

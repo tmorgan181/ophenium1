@@ -11,13 +11,18 @@
           !join             //Joins the caller's voice channel
           !leave            //Leaves the caller's voice channel
           !play             //Plays the first song in the queue if there is one
+          !pause            //Pauses current song
+          !resume           //Resumes current song
+          !skip             //Skips current song
+          !stop             //Stops music stream, makes bot leave channel
           !queue [link]     //Adds [link] to the back of the queue
+          !qstatus          //Displays how long the queue is
+          !clearq           //Clears the queue
           !ping             //Says pong! back
           !shout [message]  //Sends [message] in all caps
 
   PLANNED
     Near Future
-      -Add skip, stop, and clear queue commands for music
       -Add music info command to get song name, channel, etc (gonna need to
        replace ytdl with something else i think)
 
@@ -33,13 +38,12 @@
 
   KNOWN BUGS
     Music
-      -Using !play only plays the first song in the queue (non-fatal bug)
-      -Using !play while a song is playing crashes the bot
-      -Not really a bug, but there's no !stop command, so in order to make the
-       bot quit playing audio, must use !leave
-       
+      -Queues are separate for different guilds, but !play doesn't work if !play
+       was called first in a different guild
+
     Misc
-      -My GCP instance doesn't seem to like Ophenium very much
+      -My GCP instance doesn't seem to like Ophenium very much. But that's not a
+       huge problem rn so I probs won't fix it for a while
 
   FIXED BUGS
     01/31/19 - 02/01/19
@@ -47,3 +51,8 @@
       -!join now has a check to make sure the user and bot are not in the same
       voice channel
       -!shout works as intended
+
+    02/03/19
+      -!play plays all the songs in the queue now and doesn't crash Ophenium if
+       music is already playing
+      -!stop, !skip, etc. added
