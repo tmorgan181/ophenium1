@@ -13,11 +13,25 @@ const activityType = "Playing";
 var connectedChannel = undefined;
 var connectionStatus = undefined;
 
-
+//Object for guild's queue, NEEDS TO BE CHANGED TO AN OBJECT CONSTRUCTOR FOR
+//EACH GUILD
 var servers = {
   queue: []
 };
 
+//Object constructor for users in Gem Jam
+function GameUser(id) {
+  this.userID = id;
+  this.crown = false;
+  this.balance = 0;
+  this.gems = [];
+  this.items = [];
+}
+
+//List of Gem Jam players
+var players = [];
+
+//Function for startup
 bot.on('ready', () => {
 
   //Output connection message
@@ -31,6 +45,7 @@ bot.on('ready', () => {
   bot.user.setActivity(`${activity}`, {type: `${activityType}`});
 });
 
+//Function for received message
 bot.on('message', (message) => {
 
   //Prevent bot from responding to itself
@@ -61,6 +76,10 @@ function processCommand(message) {
     case (" "):
       message.channel.send("You need to enter a command for me to do " +
        "anything... Try `!help` if you're stuck");
+      break;
+
+    case "gemJam":
+      gemJam(args, message);
       break;
 
     case "help":
@@ -314,13 +333,19 @@ function helpCommand(args, message) {
   //Here check for args and act based on its presence and value
   if (args.length > 0) {
     switch (args) {
+      case "gemJam":
+        message.channel.send("`!gemJam [command]` performs [command] within " +
+         "Gem Jam, a fun little game about collecting rare gems! For full " +
+         "game instructions type `!gemJam help`");
+        break;
+
       case "help":
         message.channel.send("Well you obv already know how to use it :)");
         break;
 
       case "howdy":
-        message.channel.send("`!howdy` doesn't have any real purpose" +
-         ", it just makes me say \"partner\"");
+        message.channel.send("`!howdy` doesn't have any real purpose, it " +
+         "just makes me say \"partner\"");
         break;
 
       case "join":
@@ -390,7 +415,9 @@ function helpCommand(args, message) {
     message.channel.send("Current list of commands (used with " +
      "`![command] [arguments]`):" +
      "\n\n`!help [command]`\t-Lists commands and their descriptions or gives " +
-     " a detailed explanation of [command]" +
+      "a detailed explanation of [command]" +
+     "\n`!gemJam [command]`\t-Command prefix for Gem Jam game. For full game " +
+      "instructions type `!gemJam help`" +
      "\n`!howdy`\t-Makes me say \"partner\"" +
      "\n`!join`\t-Makes me join the caller's voice channel" +
      "\n`!leave`\t-Makes me leave the caller's voice channel" +
@@ -465,13 +492,119 @@ function playCommand(server, message) {
 function shoutCommand(args, message) {
 
   //Check for the shouted message
-  if (args.length == 0) {
+  if (!args.length) {
     message.channel.send("You didn't give me anything to shout...");
   }
   else {
     //Get [message] only and turn to upper case
     let newMessage = message.content.slice(7);
     message.channel.send(`${newMessage.toUpperCase()}`);
+  }
+}
+
+function gemJam(args, message) {
+
+  //Check for an argument
+  if (!args.length) {
+    message.channel.send("Welcome to Gem Jam! For game instructions type " +
+     "'!gemJam help'");
+    return;
+  }
+
+  //Get current player's id
+  let exists = false;
+  let currentPlayer = undefined;
+  players.forEach(function(i) {
+    if (i.userID == message.author.id) {
+      currentPlayer = i;
+      exists = true;
+    }
+  });
+
+  //Game commands
+  switch (args) {
+    case "help": //output game instuctions and command opotions
+
+      break;
+
+    case "create": //create new profile
+      if (exists) { //check if profile has already been made
+        message.channel.send("It seems you have already created a profile! For " +
+         "game instructions type `!gemJam help`");
+      }
+      else { //otherwise make new profile
+        players.push(new GameUser(message.author.id));
+        message.channel.send("Profile successfully created!");
+        //Save player profiles later when we get to file streaming
+      }
+      break;
+
+    case "mine": //go mining for a gem, main game function
+      if (exists) {
+
+      }
+      else {
+        message.channel.send("You need to make a profile first! Do so with " +
+         "`!gemJam create`");
+      }
+      break;
+
+    case "collection": //show user's current gem collection
+      if (exists) {
+
+      }
+      else {
+        message.channel.send("You need to make a profile first! Do so with " +
+         "`!gemJam create`");
+      }
+      break;
+
+    case "sell": //sell a gem for coins
+      if (exists) {
+
+      }
+      else {
+        message.channel.send("You need to make a profile first! Do so with " +
+         "`!gemJam create`");
+      }
+      break;
+
+    case "balance": //show user's coin balance
+      if (exists) {
+        message.channel.send(`${message.author.username}, you currently have ` +
+         `${currentPlayer.balance} coins. You can get more by selling your ` +
+         "duplicate gems to the Shopkeeper (with `!gemJam sell`) or use them to " +
+         "buy cool stuff (with `!gemJam shop`)");
+      }
+      else {
+        message.channel.send("You need to make a profile first! Do so with " +
+         "`!gemJam create`");
+      }
+      break;
+
+    case "crownMe": //give Crown of Wonder to user with full collection
+      if (exists) {
+
+      }
+      else {
+        message.channel.send("You need to make a profile first! Do so with " +
+         "`!gemJam create`");
+      }
+      break;
+
+    case "shop": //shop for items
+      if (exists) {
+
+      }
+      else {
+        message.channel.send("You need to make a profile first! Do so with " +
+         "`!gemJam create`");
+      }
+      break;
+
+    default: //default for unknown commands
+      message.channel.send("I'm not sure what you mean... For game " +
+       "instructions type `!gemJam help`");
   }
 }
 

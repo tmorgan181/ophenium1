@@ -5,6 +5,8 @@
       -This is the basis of Ophenium I (in theory), where most functions can be
        accessed
       -List of available commands:
+          !gemJam [command]    //Performs [command] within Gem Jam (game
+                              description and commands below)
           !help [command]   //Lists commands and their descriptions or gives a
                               detailed explanation of [command]
           !howdy            //Says partner back
@@ -21,7 +23,25 @@
           !ping             //Says pong! back
           !shout [message]  //Sends [message] in all caps
 
+    GEM JAM
+      -Gem Jam is a fun little gem collecting game, based on the classic Webkinz
+       game Gem Hunt
+
+      Commands (all of which begin with the `!gemJam` prefix)
+          help              //Print game instructions and list of commands
+          create            //Create a new player profile
+          mine              //Go mining for gems in one of the four mines
+          collection        //Show gem collection
+          sell              //Sell a duplicate gem to the Shopkeeper
+          balance           //Show coin balance
+          crownMe           //Reward a complete collection of gems with the
+                              legendary Crown of Wonder
+          shop              //Shop for cool items with coins
+
   PLANNED
+    Current Work
+      -Gem Jam
+
     Near Future
       -Add music info command to get song name, channel, etc (gonna need to
        replace ytdl with something else i think)
