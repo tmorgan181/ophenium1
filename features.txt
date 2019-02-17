@@ -5,7 +5,7 @@
       -This is the basis of Ophenium I (in theory), where most functions can be
        accessed
       -List of available commands:
-          !gemJam [command]    //Performs [command] within Gem Jam (game
+          !gemJam [command] //Performs [command] within Gem Jam (game
                               description and commands below)
           !help [command]   //Lists commands and their descriptions or gives a
                               detailed explanation of [command]
@@ -28,18 +28,20 @@
        game Gem Hunt
 
       Commands (all of which begin with the `!gemJam` prefix)
-          help              //Print game instructions and list of commands
+          instruct          //Show game instructions
+          commands          //Show game commands
           create            //Create a new player profile
-          mine              //Go mining for gems in one of the four mines
+          remove            //Remove a player profile
+          mine [mineName]   //Go mining for gems in [mineName]
           collection        //Show gem collection
-          sell              //Sell a duplicate gem to the Shopkeeper
+          sell [gem]        //Sell a gem to the Shopkeeper
           balance           //Show coin balance
           crownMe           //Reward a complete collection of gems with the
                               legendary Crown of Wonder
           shop              //Shop for cool items with coins
 
   PLANNED
-    Current Work
+    Currently Working On
       -Gem Jam
 
     Near Future

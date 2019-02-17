@@ -14,7 +14,7 @@ var connectedChannel = undefined;
 var connectionStatus = undefined;
 
 //Object for guild's queue, NEEDS TO BE CHANGED TO AN OBJECT CONSTRUCTOR FOR
-//EACH GUILD
+//EACH GUILD IN ORDER TO HAVE SEPARATE QUEUES
 var servers = {
   queue: []
 };
@@ -28,8 +28,24 @@ function GameUser(id) {
   this.items = [];
 }
 
-//List of Gem Jam players
+//Array of Gem Jam players
 var players = [];
+
+//Arrays of gems based on designated rarity
+const slag = "Slag";
+const commonGems = ["Quartz", "Opal", "Malachite", "Turqoise", "Jade", "Garnet",
+                  "Aquamarine", "Amber"];
+const uncommonGems = ["Amethyst", "Diamond", "Ruby", "Topaz", "Emerald"];
+const rareGems = ["Moonstone", "Sapphire", "Black Opal","Peacock Topaz"];
+
+//Rarity constants
+const slagChance = .2;
+const commonChance = .5;
+const uncommonChance = .2;
+const rareChance = .1;
+
+//Array of mines to visit
+const mines = ["Nova Stella", "Twin Creek", "Ebony Abyss"];
 
 //Function for startup
 bot.on('ready', () => {
@@ -78,7 +94,7 @@ function processCommand(message) {
        "anything... Try `!help` if you're stuck");
       break;
 
-    case "gemJam":
+    case "gemjam":
       gemJam(args, message);
       break;
 
@@ -336,7 +352,7 @@ function helpCommand(args, message) {
       case "gemJam":
         message.channel.send("`!gemJam [command]` performs [command] within " +
          "Gem Jam, a fun little game about collecting rare gems! For full " +
-         "game instructions type `!gemJam help`");
+         "game instructions type `!gemJam instruct`");
         break;
 
       case "help":
@@ -417,7 +433,7 @@ function helpCommand(args, message) {
      "\n\n`!help [command]`\t-Lists commands and their descriptions or gives " +
       "a detailed explanation of [command]" +
      "\n`!gemJam [command]`\t-Command prefix for Gem Jam game. For full game " +
-      "instructions type `!gemJam help`" +
+      "instructions type `!gemJam instruct`" +
      "\n`!howdy`\t-Makes me say \"partner\"" +
      "\n`!join`\t-Makes me join the caller's voice channel" +
      "\n`!leave`\t-Makes me leave the caller's voice channel" +
@@ -504,12 +520,19 @@ function shoutCommand(args, message) {
 
 function gemJam(args, message) {
 
+  //Set bot activity to "Playing Gem Jam"
+  bot.user.setActivity("Gem Jam");
+
   //Check for an argument
   if (!args.length) {
     message.channel.send("Welcome to Gem Jam! For game instructions type " +
-     "'!gemJam help'");
+     "'!gemJam instruct'");
     return;
   }
+
+  //Separate game command from arguments
+  let split = args.split(" ");
+  let gameCommand = split[0].toString();
 
   //Get current player's id
   let exists = false;
@@ -522,26 +545,82 @@ function gemJam(args, message) {
   });
 
   //Game commands
-  switch (args) {
-    case "help": //output game instuctions and command opotions
+  switch (gameCommand) {
+    case "instruct": //output game instuctions
+      message.channel.send("Gem Jam is a game about collecting gems from the " +
+       "mines. There are 16 in total to collect from 3 different mines. When " +
+       "you go mining you have a chance of getting gems of varying rarity or " +
+       "slag. Gems you recover from the mines can be sold to the Shopkeeper " +
+       "for coins or kept and added to your collection. Coins can, in turn, " +
+       "be used to buy cool items. Once your collection is " +
+       "complete, you can claim your prize: the Crown of Wonder!\nFor a list " +
+       "of game commands type `!gemJam commands` or to create a profile type " +
+       "`!gemJam create`");
+      break;
 
+    case "commands": //output game commands and descriptions
+      message.channel.send("Gem Jam Commands (used with `!gemJam [command]`):" +
+       "\n`instruct`\t-Show game instructions\n" +
+       "`commands`\t-Show game commands\n" +
+       "`create`\t-Create a new profile\n" +
+       "`remove`\t-Remove your profile\n" +
+       "`mine [mineName]``\t-Go mining for gems in [mineName] (Nova Stella, " +
+       "Twin Creek, or Ebony Abyss)\n" +
+       "`collection`\t-Show your gem collection\n" +
+       "`sell [gem]`\t-Sell a gem to the Shopkeeper\n" +
+       "`balance`\t-Show your coin balance\n" +
+       "`crownMe`\t-Reward a complete collection of gems with the " +
+       "legendary Crown of Wonder\n" +
+       "`shop`\t-Shop for items with coins");
       break;
 
     case "create": //create new profile
       if (exists) { //check if profile has already been made
         message.channel.send("It seems you have already created a profile! For " +
-         "game instructions type `!gemJam help`");
+         "game instructions type `!gemJam instruct`");
       }
       else { //otherwise make new profile
-        players.push(new GameUser(message.author.id));
+        players.push(new GameUser(message.author.id)); //add profile to list
+        let jammer = message.guild.roles.find(r => r.name === "Gem Jammer");
+        message.member.addRole(jammer);
         message.channel.send("Profile successfully created!");
         //Save player profiles later when we get to file streaming
       }
       break;
 
+    case "remove": //remove existing profile
+      if (exists) {
+        players = players.filter(function(element) { //remove profile
+          return element.userID != currentPlayer.userID });
+        let jammer = message.guild.roles.find(r => r.name === "Gem Jammer");
+        message.member.removeRole(jammer); //remove role
+        message.channel.send("Profile successfully removed!");
+        //Save changes
+      }
+      else {
+        message.channel.send("There is no profile to remove!");
+      }
+      break;
+
     case "mine": //go mining for a gem, main game function
       if (exists) {
-
+        let chosenMine = undefined;
+        let validMine = false;
+        for (let i = 0; i < mines.length; i++) {
+          if (mines[i] == message.slice(13)) { //need a fix for this
+            message.channel.send(`Alrighty, off to ${mines[i]} Mine!`)
+            chosenMine = mines[i];
+            validMine = true;
+          }
+        }
+        if (validMine) {
+          goMining(chosenMine, currentPlayer);
+        }
+        else {
+          message.channel.send("I'm not sure which mine you mean. Make sure " +
+           "you use the format `!gemJam mine [mineName]` (case and space " +
+           "sensitive)");
+        }
       }
       else {
         message.channel.send("You need to make a profile first! Do so with " +
@@ -572,9 +651,9 @@ function gemJam(args, message) {
     case "balance": //show user's coin balance
       if (exists) {
         message.channel.send(`${message.author.username}, you currently have ` +
-         `${currentPlayer.balance} coins. You can get more by selling your ` +
-         "duplicate gems to the Shopkeeper (with `!gemJam sell`) or use them to " +
-         "buy cool stuff (with `!gemJam shop`)");
+         `${currentPlayer.balance} coins. You can get coins by selling your ` +
+         "duplicate gems to the Shopkeeper (with `!gemJam sell`) and use " +
+         "them to buy cool stuff (with `!gemJam shop`)");
       }
       else {
         message.channel.send("You need to make a profile first! Do so with " +
@@ -604,8 +683,13 @@ function gemJam(args, message) {
 
     default: //default for unknown commands
       message.channel.send("I'm not sure what you mean... For game " +
-       "instructions type `!gemJam help`");
+       "instructions type `!gemJam instruct`");
   }
+}
+
+function goMining(chosenMine, currentPlayer) {
+
+  return;
 }
 
 bot.login();
