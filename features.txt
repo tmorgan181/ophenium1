@@ -32,7 +32,7 @@
           commands          //Show game commands
           create            //Create a new player profile
           remove            //Remove a player profile
-          mine [mineName]   //Go mining for gems in [mineName]
+          mine [mineNumber] //Go mining for gems in [mineNumber]
           collection        //Show gem collection
           sell [gem]        //Sell a gem to the Shopkeeper
           balance           //Show coin balance
@@ -78,3 +78,6 @@
       -!play plays all the songs in the queue now and doesn't crash Ophenium if
        music is already playing
       -!stop, !skip, etc. added
+
+
+//Ophenium I - Created by Trenton Morgan 2019

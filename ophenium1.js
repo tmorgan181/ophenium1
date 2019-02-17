@@ -1,6 +1,9 @@
-const Discord = require('discord.js');
+//Ophenium I - Created by Trenton Morgan 2019
+
+const Discord = require("discord.js");
 const YTDL = require("ytdl-core");
-require('dotenv').config();
+const GemJam = require("./gemJam.js");
+require("dotenv").config();
 
 const bot = new Discord.Client();
 const prefix = process.env.PREFIX;
@@ -23,6 +26,7 @@ var servers = {
 function GameUser(id) {
   this.userID = id;
   this.crown = false;
+  this.lastPlayed = 0;
   this.balance = 0;
   this.gems = [];
   this.items = [];
@@ -32,20 +36,22 @@ function GameUser(id) {
 var players = [];
 
 //Arrays of gems based on designated rarity
-const slag = "Slag";
 const commonGems = ["Quartz", "Opal", "Malachite", "Turqoise", "Jade", "Garnet",
                   "Aquamarine", "Amber"];
 const uncommonGems = ["Amethyst", "Diamond", "Ruby", "Topaz", "Emerald"];
 const rareGems = ["Moonstone", "Sapphire", "Black Opal","Peacock Topaz"];
 
 //Rarity constants
-const slagChance = .2;
-const commonChance = .5;
-const uncommonChance = .2;
-const rareChance = .1;
+const slagLimit = .2;
+const commonLimit = .7;
+const uncommonLimit = .9;
+const rareLimit = 1;
+
+//Wait time (ms)
+const waitTime = 300000;
 
 //Array of mines to visit
-const mines = ["Nova Stella", "Twin Creek", "Ebony Abyss"];
+const mines = ["Nova Stella", "Twin Creeks", "Ebony Abyss"];
 
 //Function for startup
 bot.on('ready', () => {
@@ -84,7 +90,7 @@ function processCommand(message) {
   let splitCommand = fullCommand.split(" "); //split message at spaces
   let primaryCommand = splitCommand[0]; //first word is primary command
   //The rest of the words become a string to be used as arguments
-  let args = splitCommand.slice(1).toString();
+  let args = splitCommand.slice(1);
 
   //Check primaryCommand and act accordingly
   switch (primaryCommand.toLowerCase()) {
@@ -95,7 +101,7 @@ function processCommand(message) {
       break;
 
     case "gemjam":
-      gemJam(args, message);
+      GemJam.gemJam(args, message);
       break;
 
     case "help":
@@ -530,11 +536,10 @@ function gemJam(args, message) {
     return;
   }
 
-  //Separate game command from arguments
-  let split = args.split(" ");
-  let gameCommand = split[0].toString();
+  let gameCommand = args[0]; //first argument is primary game command
+  let gameArgs = args.slice(1); //rest of array is arguments
 
-  //Get current player's id
+  //Get current player's id and check if they have a profile already
   let exists = false;
   let currentPlayer = undefined;
   players.forEach(function(i) {
@@ -545,10 +550,10 @@ function gemJam(args, message) {
   });
 
   //Game commands
-  switch (gameCommand) {
+  switch (gameCommand.toLowerCase()) {
     case "instruct": //output game instuctions
       message.channel.send("Gem Jam is a game about collecting gems from the " +
-       "mines. There are 16 in total to collect from 3 different mines. When " +
+       "mines. There are 17 in total to collect from 3 different mines. When " +
        "you go mining you have a chance of getting gems of varying rarity or " +
        "slag. Gems you recover from the mines can be sold to the Shopkeeper " +
        "for coins or kept and added to your collection. Coins can, in turn, " +
@@ -564,8 +569,8 @@ function gemJam(args, message) {
        "`commands`\t-Show game commands\n" +
        "`create`\t-Create a new profile\n" +
        "`remove`\t-Remove your profile\n" +
-       "`mine [mineName]``\t-Go mining for gems in [mineName] (Nova Stella, " +
-       "Twin Creek, or Ebony Abyss)\n" +
+       "`mine [mineNumber]`\t-Go mining for gems in [mineNumber] (1: Nova " +
+       "Stella, 2: Twin Creek, or 3: Ebony Abyss)\n" +
        "`collection`\t-Show your gem collection\n" +
        "`sell [gem]`\t-Sell a gem to the Shopkeeper\n" +
        "`balance`\t-Show your coin balance\n" +
@@ -595,7 +600,7 @@ function gemJam(args, message) {
         let jammer = message.guild.roles.find(r => r.name === "Gem Jammer");
         message.member.removeRole(jammer); //remove role
         message.channel.send("Profile successfully removed!");
-        //Save changes
+        //Save changes when file i/o is implemented
       }
       else {
         message.channel.send("There is no profile to remove!");
@@ -603,23 +608,46 @@ function gemJam(args, message) {
       break;
 
     case "mine": //go mining for a gem, main game function
-      if (exists) {
-        let chosenMine = undefined;
-        let validMine = false;
-        for (let i = 0; i < mines.length; i++) {
-          if (mines[i] == message.slice(13)) { //need a fix for this
-            message.channel.send(`Alrighty, off to ${mines[i]} Mine!`)
-            chosenMine = mines[i];
-            validMine = true;
+      if (exists) { //check profile already made
+        let timeSinceLast = Date.now() - currentPlayer.lastPlayed;
+        if (timeSinceLast >= waitTime) {
+          let chosenMine = undefined;
+          let validMine = false;
+          for (let i = 1; i <= mines.length; i++) {
+            if (gameArgs[0] == i && !validMine) { //check if mine name is valid
+              message.channel.send(`Off to ${mines[(i - 1)]} Mine!`);
+              chosenMine = mines[(i - 1)];
+              validMine = true;
+            }
+          }
+          if (validMine) {
+            let discoveredGem = goMining(message, chosenMine);
+            if (discoveredGem) {
+              currentPlayer.gems.push(discoveredGem);
+              message.channel.send(`You found ${discoveredGem}!`);
+              if (rareGems.includes(discoveredGem)) {
+                message.channel.send("Wow, a rare gem! Great find!");
+              }
+              else if (uncommonGems.includes(discoveredGem)) {
+                message.channel.send("Don't see those too often!");
+              }
+              else if (commonGems.includes(discoveredGem)) {
+                message.channel.send("It's not very rare, but still a fine " +
+                 "gem.");
+              }
+              message.channel.send("It's been added to your collection.");
+            }
+            currentPlayer.lastPlayed = Date.now();
+          }
+          else {
+            message.channel.send("I'm not sure which mine you mean. Make " +
+             "sure you're using the format `!gemJam mine [mineNumber]`");
           }
         }
-        if (validMine) {
-          goMining(chosenMine, currentPlayer);
-        }
         else {
-          message.channel.send("I'm not sure which mine you mean. Make sure " +
-           "you use the format `!gemJam mine [mineName]` (case and space " +
-           "sensitive)");
+          message.channel.send("You must wait 5 minutes between trips to " +
+           "the mines! You can go again in " +
+            `${((waitTime - timeSinceLast) / 60000).toFixed(2)} minutes`);
         }
       }
       else {
@@ -682,14 +710,118 @@ function gemJam(args, message) {
       break;
 
     default: //default for unknown commands
-      message.channel.send("I'm not sure what you mean... For game " +
-       "instructions type `!gemJam instruct`");
+      message.channel.send("I don't know that command... For a list of " +
+       "commands type `!gemJam commands`");
   }
-}
-
-function goMining(chosenMine, currentPlayer) {
 
   return;
+}
+
+function goMining(message, chosenMine) {
+
+  //Mining vars
+  let possibleCommons = [];
+  let possibleUncommons = [];
+  let possibleRares = [];
+
+  let gemType = randomGemType();
+  let gemIndex = undefined;
+  let discoveredGem = undefined;
+
+  switch (chosenMine) {
+    case "Nova Stella":
+      possibleCommons = ["Quartz", "Opal", "Malachite", "Jade"];
+      possibleUncommons = ["Topaz", "Amethyst", "Diamond"];
+      possibleRares = ["Moonstone", "Peacock Topaz"];
+
+      if (gemType == "slag") {
+        message.channel.send("Drat, nothing but slag.");
+        return;
+      }
+      else if (gemType == "common") {
+        gemIndex = Math.floor(Math.random() * possibleCommons.length);
+        discoveredGem = possibleCommons[gemIndex];
+      }
+      else if (gemType == "uncommon") {
+        gemIndex = Math.floor(Math.random() * possibleUncommons.length);
+        discoveredGem = possibleUncommons[gemIndex];
+      }
+      else if (gemType == "rare") {
+        gemIndex = Math.floor(Math.random() * possibleRares.length);
+        discoveredGem = possibleRares[gemIndex];
+      }
+      break;
+
+    case "Twin Creeks":
+      possibleCommons = ["Turqoise", "Aquamarine", "Malachite", "Jade"];
+      possibleUncommons = ["Topaz", "Emerald", "Diamond"];
+      possibleRares = ["Sapphire", "Peacock Topaz"];
+
+      if (gemType == "slag") {
+        message.channel.send("Drat, nothing but slag.");
+        return;
+      }
+      else if (gemType == "common") {
+        gemIndex = Math.floor(Math.random() * possibleCommons.length);
+        discoveredGem = possibleCommons[gemIndex];
+      }
+      else if (gemType == "uncommon") {
+        gemIndex = Math.floor(Math.random() * possibleUncommons.length);
+        discoveredGem = possibleUncommons[gemIndex];
+      }
+      else if (gemType == "rare") {
+        gemIndex = Math.floor(Math.random() * possibleRares.length);
+        discoveredGem = possibleRares[gemIndex];
+      }
+      break;
+
+    case "Ebony Abyss":
+      possibleCommons = ["Quartz", "Garnet", "Amber", "Jade"];
+      possibleUncommons = ["Emerald", "Amethyst", "Ruby"];
+      possibleRares = ["Moonstone", "Black Opal"];
+
+      if (gemType == "slag") {
+        message.channel.send("Drat, nothing but slag.");
+        return;
+      }
+      else if (gemType == "common") {
+        gemIndex = Math.floor(Math.random() * possibleCommons.length);
+        discoveredGem = possibleCommons[gemIndex];
+      }
+      else if (gemType == "uncommon") {
+        gemIndex = Math.floor(Math.random() * possibleUncommons.length);
+        discoveredGem = possibleUncommons[gemIndex];
+      }
+      else if (gemType == "rare") {
+        gemIndex = Math.floor(Math.random() * possibleRares.length);
+        discoveredGem = possibleRares[gemIndex];
+      }
+      break;
+  }
+
+  return discoveredGem;
+}
+
+function randomGemType() {
+  let rand = Math.random();
+  let gemType = undefined;
+  if (rand >= 0 && rand < slagLimit) {
+    gemType = "slag";
+  }
+  else if (rand >= slagLimit && rand < commonLimit) {
+    gemType = "common";
+  }
+  else if (rand >= commonLimit && rand < uncommonLimit) {
+    gemType = "uncommon";
+  }
+  else if (rand >= uncommonLimit && rand < rareLimit) {
+    gemType = "rare";
+  }
+  else {
+    console.log("Math.random() error");
+  }
+
+  return gemType;
 }
 
 bot.login();
