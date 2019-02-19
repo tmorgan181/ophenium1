@@ -29,7 +29,7 @@ const uncommonLimit = .9;
 const rareLimit = 1;
 
 //Wait time (ms)
-const waitTime = 0//300000;
+const waitTime = 300000;
 
 //Array of mines to visit
 const mines = ["Nova Stella", "Twin Creeks", "Ebony Abyss"];
@@ -189,7 +189,7 @@ exports.gemJam = function(args, message) {
 
     case "sell": //sell a gem for coins
       if (exists) {
-
+        message.channel.send("Feature coming soon!");
       }
       else {
         message.channel.send("You need to make a profile first! Do so with " +
@@ -219,8 +219,9 @@ exports.gemJam = function(args, message) {
           }
         });
         if (complete && !currentPlayer.crown) {
-          let cow = message.guild.roles.find(r => r.name === "Crown of Wonder");
-          message.member.addRole(cow);
+          currentPlayer.crown = true; //edit player profile
+          message.member.addRole(message.guild.roles.find(r => r.name ===
+           "Crown of Wonder"); //add role
           message.channel.send("Congratulations, you have completed your " +
            "collection of gems and earned the legendary Crown of Wonder! " +
            "You've been awarded the `Crown of Wonder` role.");
@@ -242,7 +243,7 @@ exports.gemJam = function(args, message) {
 
     case "shop": //shop for items
       if (exists) {
-
+        message.channel.send("Feature coming soon!");
       }
       else {
         message.channel.send("You need to make a profile first! Do so with " +
