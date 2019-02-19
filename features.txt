@@ -42,17 +42,20 @@
 
   PLANNED
     Currently Working On
-      -Gem Jam
+      -Gem Jam: shop and sell, trading system?
+      -Gem Jam: confirm before removing profile and selling gem (use
+       lastmessage.id?)
 
-    Near Future
+    Backburner
       -Add music info command to get song name, channel, etc (gonna need to
        replace ytdl with something else i think)
+      -Search function for music instead of links (karl knows how?)
 
     Random Stuff
       -Grab pictures from the internet and post them or something
       -this is it chief (whatever that means)
 
-    Maybe Long Road
+    Maybe Later?
       -Role sort
       -Channel creator/manager
       -Some other useful stuff
@@ -62,6 +65,9 @@
     Music
       -Queues are separate for different guilds, but !play doesn't work if !play
        was called first in a different guild
+
+    Gem Jam
+      -No known bugs
 
     Misc
       -My GCP instance doesn't seem to like Ophenium very much. But that's not a

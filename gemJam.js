@@ -221,7 +221,7 @@ exports.gemJam = function(args, message) {
         if (complete && !currentPlayer.crown) {
           currentPlayer.crown = true; //edit player profile
           message.member.addRole(message.guild.roles.find(r => r.name ===
-           "Crown of Wonder"); //add role
+           "Crown of Wonder")); //add role
           message.channel.send("Congratulations, you have completed your " +
            "collection of gems and earned the legendary Crown of Wonder! " +
            "You've been awarded the `Crown of Wonder` role.");
