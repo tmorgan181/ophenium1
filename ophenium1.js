@@ -63,10 +63,18 @@ function processCommand(message) {
   //Check primaryCommand and act accordingly
   switch (primaryCommand.toLowerCase()) {
     case "gemjam":
-      //Set bot activity to "Playing Gem Jam"
-      bot.user.setActivity("Gem Jam");
-      //Run game function from module
-      GemJam.gemJam(args, message);
+      let jamChannel = 547224252211003402;
+      let testChannel = 539614921248342016;
+      if (message.channel.id == jamChannel || message.channel.id == testChannel) {
+        //Set bot activity to "Playing Gem Jam"
+        bot.user.setActivity("Gem Jam");
+        //Run game function from module
+        GemJam.gemJam(args, message);
+      }
+      else {
+        message.channel.send("Please keep game commands in #gem-jam");
+        message.delete;
+      }
       break;
 
     case "help":

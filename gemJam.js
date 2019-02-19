@@ -16,9 +16,9 @@ function GameUser(id) {
 
 
 //Arrays of gems based on designated rarity
-const commonGems = ["Quartz", "Opal", "Malachite", "Turqoise", "Jade", "Garnet",
-                  "Aquamarine", "Amber"];
-const uncommonGems = ["Amethyst", "Diamond", "Ruby", "Topaz", "Emerald"];
+const commonGems = ["Opal", "Quartz", "Jade", "Malachite", "Aquamarine",
+                    "Turqoise", "Amber", "Garnet"];
+const uncommonGems = ["Amethyst", "Diamond", "Emerald", "Topaz", "Ruby"];
 const rareGems = ["Moonstone", "Sapphire", "Black Opal","Peacock Topaz"];
 const allGems = commonGems.concat(uncommonGems, rareGems);
 
@@ -126,7 +126,7 @@ exports.gemJam = function(args, message) {
           let validMine = false;
           for (let i = 1; i <= mines.length; i++) {
             if (gameArgs[0] == i && !validMine) { //check if mine name is valid
-              message.channel.send(`Off to ${mines[(i - 1)]} Mine!`);
+              message.channel.send(`Off to ${mines[(i - 1)]} Mine...`);
               chosenMine = mines[(i - 1)];
               validMine = true;
             }
@@ -134,8 +134,8 @@ exports.gemJam = function(args, message) {
           if (validMine) {
             let discoveredGem = goMining(message, chosenMine); //get random gem
             if (discoveredGem) {
-              currentPlayer.gems.push(discoveredGem);
               message.channel.send(`You found ${discoveredGem}!`);
+              //Output based on rarity
               if (rareGems.includes(discoveredGem)) {
                 message.channel.send("Wow, a rare gem! Great find!");
               }
@@ -145,6 +145,11 @@ exports.gemJam = function(args, message) {
               else if (commonGems.includes(discoveredGem)) {
                 message.channel.send("Not very rare, but still a fine gem.");
               }
+              if (currentPlayer.gems.includes(discoveredGem)) {
+                message.channel.send("Looks like a duplicate. No worries, you "+
+                 "can (soon) sell those to the Shopkeeper for coins.");
+              }
+              currentPlayer.gems.push(discoveredGem);
               message.channel.send("It's been added to your collection.");
             }
             currentPlayer.lastPlayed = Date.now();
@@ -170,14 +175,19 @@ exports.gemJam = function(args, message) {
 
     case "collection": //show user's current gem collection
       if (exists) {
-        let collectionString = "";
+        let collectionString = ""; //initialize string to be output
         for (let i = 0; i < currentPlayer.gems.length; i++) {
           //Prevent repeats in output
           if (!(collectionString.includes(currentPlayer.gems[i]))) {
-            collectionString += (currentPlayer.gems[i] + ", ");
+            collectionString += currentPlayer.gems[i];
+            let count = occurances(i, currentPlayer);
+            if (count > 1) { //show duplicates as gemName(x[count])
+              collectionString += ` (x${count})`;
+            }
+            collectionString += ", " //format as comma delimited list
           }
         }
-        collectionString = collectionString.slice(0, -2);
+        collectionString = collectionString.slice(0, -2); //trim final comma
         message.channel.send("Here is your collection, " +
          `${message.author.username}:\n${collectionString}`);
       }
@@ -273,8 +283,8 @@ function goMining(message, chosenMine) {
 
   switch (chosenMine) {
     case "Nova Stella":
-      possibleCommons = ["Quartz", "Opal", "Malachite", "Jade"];
-      possibleUncommons = ["Topaz", "Amethyst", "Diamond"];
+      possibleCommons = ["Opal", "Quartz", "Jade", "Malachite"];
+      possibleUncommons = ["Amethyst", "Diamond", "Emerald"];
       possibleRares = ["Moonstone", "Peacock Topaz"];
 
       if (gemType == "slag") {
@@ -347,6 +357,7 @@ function goMining(message, chosenMine) {
 
 //Select a gem type randomly based on rarity of each
 function randomGemType() {
+
   let rand = Math.random();
   let gemType = undefined;
   if (rand >= 0 && rand < slagLimit) {
@@ -366,4 +377,17 @@ function randomGemType() {
   }
 
   return gemType;
+}
+
+//Count occurances of passed gem in currentPlayer.gems
+function occurances(i, currentPlayer) {
+
+  let count = 0;
+  currentPlayer.gems.forEach(function (a) {
+    if (a == currentPlayer.gems[i]) {
+      count++;
+    }
+  });
+
+  return count;
 }
