@@ -14,13 +14,13 @@ function GameUser(id) {
   this.items = [];
 }
 
-
 //Arrays of gems based on designated rarity
 const commonGems = ["Opal", "Quartz", "Jade", "Malachite", "Aquamarine",
                     "Turqoise", "Amber", "Garnet"];
 const uncommonGems = ["Amethyst", "Diamond", "Emerald", "Topaz", "Ruby"];
 const rareGems = ["Moonstone", "Sapphire", "Black Opal","Peacock Topaz"];
 const allGems = commonGems.concat(uncommonGems, rareGems);
+const andyGem = ["Uranium"];
 
 //Rarity constants
 const slagLimit = .2;
@@ -32,7 +32,8 @@ const rareLimit = 1;
 const waitTime = 300000;
 
 //Array of mines to visit
-const mines = ["Nova Stella", "Twin Creeks", "Ebony Abyss"];
+const mines = ["Nova Stella", "Twin Creeks", "Ebony Abyss",
+               "Andy's Pit of Dispair"];
 
 //Main function, accessible by ophenium1.js
 exports.gemJam = function(args, message) {
@@ -131,7 +132,7 @@ exports.gemJam = function(args, message) {
               validMine = true;
             }
           }
-          if (validMine) {
+          if (validMine) { //check that mine number exists
             let discoveredGem = goMining(message, chosenMine); //get random gem
             if (discoveredGem) {
               message.channel.send(`You found ${discoveredGem}!`);
@@ -199,6 +200,28 @@ exports.gemJam = function(args, message) {
 
     case "sell": //sell a gem for coins
       if (exists) {
+        if (!gameArgs[0]) {
+          message.channel.send("You must specify a gem to sell first.")
+        }
+
+        if (totalGems.includes(gameArgs[0])) { //check specified gem exists
+
+        }
+
+
+        //Check if last message and this one are the same, meaning confirm sell
+        if (message.content == message.author.lastMessage.content) {
+          let worth;
+          if (commonGems.includes(gameArgs[0])) {
+            worth = commonWorth;
+          }
+          else if (uncommonGems.includes(gameArgs[0])) {
+            worth = uncommonWorth;
+          }
+          else if (rareGems.includes(gameArgs[0])) {
+            worth = rareWorth;
+          }
+        }
         message.channel.send("Feature coming soon!");
       }
       else {
@@ -286,70 +309,46 @@ function goMining(message, chosenMine) {
       possibleCommons = ["Opal", "Quartz", "Jade", "Malachite"];
       possibleUncommons = ["Amethyst", "Diamond", "Emerald"];
       possibleRares = ["Moonstone", "Peacock Topaz"];
-
-      if (gemType == "slag") {
-        message.channel.send("Drat, nothing but slag.");
-        return;
-      }
-      else if (gemType == "common") {
-        gemIndex = Math.floor(Math.random() * possibleCommons.length);
-        discoveredGem = possibleCommons[gemIndex];
-      }
-      else if (gemType == "uncommon") {
-        gemIndex = Math.floor(Math.random() * possibleUncommons.length);
-        discoveredGem = possibleUncommons[gemIndex];
-      }
-      else if (gemType == "rare") {
-        gemIndex = Math.floor(Math.random() * possibleRares.length);
-        discoveredGem = possibleRares[gemIndex];
-      }
       break;
 
     case "Twin Creeks":
       possibleCommons = ["Turqoise", "Aquamarine", "Malachite", "Jade"];
       possibleUncommons = ["Topaz", "Emerald", "Diamond"];
       possibleRares = ["Sapphire", "Peacock Topaz"];
-
-      if (gemType == "slag") {
-        message.channel.send("Drat, nothing but slag.");
-        return;
-      }
-      else if (gemType == "common") {
-        gemIndex = Math.floor(Math.random() * possibleCommons.length);
-        discoveredGem = possibleCommons[gemIndex];
-      }
-      else if (gemType == "uncommon") {
-        gemIndex = Math.floor(Math.random() * possibleUncommons.length);
-        discoveredGem = possibleUncommons[gemIndex];
-      }
-      else if (gemType == "rare") {
-        gemIndex = Math.floor(Math.random() * possibleRares.length);
-        discoveredGem = possibleRares[gemIndex];
-      }
       break;
 
     case "Ebony Abyss":
-      possibleCommons = ["Quartz", "Garnet", "Amber", "Jade"];
-      possibleUncommons = ["Emerald", "Amethyst", "Ruby"];
-      possibleRares = ["Moonstone", "Black Opal"];
-
-      if (gemType == "slag") {
-        message.channel.send("Drat, nothing but slag.");
-        return;
-      }
-      else if (gemType == "common") {
-        gemIndex = Math.floor(Math.random() * possibleCommons.length);
-        discoveredGem = possibleCommons[gemIndex];
-      }
-      else if (gemType == "uncommon") {
-        gemIndex = Math.floor(Math.random() * possibleUncommons.length);
-        discoveredGem = possibleUncommons[gemIndex];
-      }
-      else if (gemType == "rare") {
-        gemIndex = Math.floor(Math.random() * possibleRares.length);
-        discoveredGem = possibleRares[gemIndex];
-      }
+      possibleCommons = ["Jade", "Quartz", "Amber", "Garnet"];
+      possibleUncommons = ["Amethyst", "Emerald", "Ruby"];
+      possibleRares = ["Black Opal", "Moonstone"];
       break;
+    case "Andy's Pit of Dispair":
+      if (Math.random() <= .01) {
+        message.channel.send("Wowie! You got me!");
+        discoveredGem = andyGem[1]
+      }
+      else {
+        message.channel.send("Drat, nothing but slag.");
+      }
+      return discoveredGem;
+      break;
+
+    if (gemType == "slag") {
+      message.channel.send("Drat, nothing but slag.");
+      return;
+    }
+    else if (gemType == "common") {
+      gemIndex = Math.floor(Math.random() * possibleCommons.length);
+      discoveredGem = possibleCommons[gemIndex];
+    }
+    else if (gemType == "uncommon") {
+      gemIndex = Math.floor(Math.random() * possibleUncommons.length);
+      discoveredGem = possibleUncommons[gemIndex];
+    }
+    else if (gemType == "rare") {
+      gemIndex = Math.floor(Math.random() * possibleRares.length);
+      discoveredGem = possibleRares[gemIndex];
+    }
   }
 
   return discoveredGem;

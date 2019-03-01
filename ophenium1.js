@@ -65,6 +65,7 @@ function processCommand(message) {
     case "gemjam":
       let jamChannel = 547224252211003402;
       let testChannel = 539614921248342016;
+      //Make game only playable in designated channels
       if (message.channel.id == jamChannel || message.channel.id == testChannel) {
         //Set bot activity to "Playing Gem Jam"
         bot.user.setActivity("Gem Jam");
@@ -304,7 +305,7 @@ function processCommand(message) {
       }
       break;
 
-    case "modsrgay":  //heh you found my easter egg
+    case "modsrgay":
       message.channel.send("It is known");
       break;
 
