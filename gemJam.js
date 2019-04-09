@@ -29,7 +29,7 @@ const uncommonLimit = .9;
 const rareLimit = 1;
 
 //Wait time (ms)
-const waitTime = 0;
+const waitTime = 300000;
 
 //Array of mines to visit
 const mines = ["Nova Stella", "Twin Creeks", "Ebony Abyss",
