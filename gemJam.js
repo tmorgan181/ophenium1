@@ -20,7 +20,7 @@ const commonGems = ["Opal", "Quartz", "Jade", "Malachite", "Aquamarine",
 const uncommonGems = ["Amethyst", "Diamond", "Emerald", "Topaz", "Ruby"];
 const rareGems = ["Moonstone", "Sapphire", "Black Opal","Peacock Topaz"];
 const allGems = commonGems.concat(uncommonGems, rareGems);
-const andyGem = ["Uranium"];
+const andyGem = ["A Pile of Shit"];
 
 //Rarity constants
 const slagLimit = .2;
@@ -29,7 +29,7 @@ const uncommonLimit = .9;
 const rareLimit = 1;
 
 //Wait time (ms)
-const waitTime = 300000;
+const waitTime = 0;
 
 //Array of mines to visit
 const mines = ["Nova Stella", "Twin Creeks", "Ebony Abyss",
@@ -136,6 +136,7 @@ exports.gemJam = function(args, message) {
             let discoveredGem = goMining(message, chosenMine); //get random gem
             if (discoveredGem) {
               message.channel.send(`You found ${discoveredGem}!`);
+
               //Output based on rarity
               if (rareGems.includes(discoveredGem)) {
                 message.channel.send("Wow, a rare gem! Great find!");
@@ -146,10 +147,16 @@ exports.gemJam = function(args, message) {
               else if (commonGems.includes(discoveredGem)) {
                 message.channel.send("Not very rare, but still a fine gem.");
               }
+              else {
+                message.channel.send("Congrats, you found Andy's Secret Gem!" +
+                 "Get fucked everyone else!");
+              }
+
               if (currentPlayer.gems.includes(discoveredGem)) {
                 message.channel.send("Looks like a duplicate. No worries, you "+
                  "can (soon) sell those to the Shopkeeper for coins.");
               }
+
               currentPlayer.gems.push(discoveredGem);
               message.channel.send("It's been added to your collection.");
             }
@@ -304,35 +311,26 @@ function goMining(message, chosenMine) {
   let gemIndex = undefined;
   let discoveredGem = undefined;
 
-  switch (chosenMine) {
-    case "Nova Stella":
-      possibleCommons = ["Opal", "Quartz", "Jade", "Malachite"];
-      possibleUncommons = ["Amethyst", "Diamond", "Emerald"];
-      possibleRares = ["Moonstone", "Peacock Topaz"];
-      break;
+  if (chosenMine != mines[3]) {
+    switch (chosenMine) {
+      case "Nova Stella":
+        possibleCommons = ["Opal", "Quartz", "Jade", "Malachite"];
+        possibleUncommons = ["Amethyst", "Diamond", "Emerald"];
+        possibleRares = ["Moonstone", "Peacock Topaz"];
+        break;
 
-    case "Twin Creeks":
-      possibleCommons = ["Turqoise", "Aquamarine", "Malachite", "Jade"];
-      possibleUncommons = ["Topaz", "Emerald", "Diamond"];
-      possibleRares = ["Sapphire", "Peacock Topaz"];
-      break;
+      case "Twin Creeks":
+        possibleCommons = ["Turqoise", "Aquamarine", "Malachite", "Jade"];
+        possibleUncommons = ["Topaz", "Emerald", "Diamond"];
+        possibleRares = ["Sapphire", "Peacock Topaz"];
+        break;
 
-    case "Ebony Abyss":
-      possibleCommons = ["Jade", "Quartz", "Amber", "Garnet"];
-      possibleUncommons = ["Amethyst", "Emerald", "Ruby"];
-      possibleRares = ["Black Opal", "Moonstone"];
-      break;
-    case "Andy's Pit of Dispair":
-      if (Math.random() <= .01) {
-        message.channel.send("Wowie! You got me!");
-        discoveredGem = andyGem[1]
-      }
-      else {
-        message.channel.send("Drat, nothing but slag.");
-      }
-      return discoveredGem;
-      break;
-
+      case "Ebony Abyss":
+        possibleCommons = ["Jade", "Quartz", "Amber", "Garnet"];
+        possibleUncommons = ["Amethyst", "Emerald", "Ruby"];
+        possibleRares = ["Black Opal", "Moonstone"];
+        break;
+    }
     if (gemType == "slag") {
       message.channel.send("Drat, nothing but slag.");
       return;
@@ -348,6 +346,15 @@ function goMining(message, chosenMine) {
     else if (gemType == "rare") {
       gemIndex = Math.floor(Math.random() * possibleRares.length);
       discoveredGem = possibleRares[gemIndex];
+    }
+  }
+
+  else {
+    if (Math.random() <= .01) {
+      discoveredGem = andyGem[0];
+    }
+    else {
+      message.channel.send("Drat, nothing but slag.")
     }
   }
 
