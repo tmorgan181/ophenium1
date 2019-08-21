@@ -59,7 +59,6 @@
       -Role sort
       -Channel creator/manager
       -Some other useful stuff
-      -Probably something about mods are gay, thanks automod very cool
 
   KNOWN BUGS
     Music
