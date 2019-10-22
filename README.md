@@ -9,8 +9,3 @@
     -Create, manipulate, and play a stream of music
     
     -Play Gem Jam
-
-# Hi Dylan
-  Are you proud of me dad
-
-  ;P
